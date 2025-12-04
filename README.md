@@ -4,7 +4,7 @@ Autora: **Carla Denise Acevedo**
 
 ---
 
-## 📌 Descripción General del Sistema
+##  Descripción General del Sistema
 
 El **Sistema de Gestión de Inscripciones (SGI)** es una plataforma orientada a optimizar, digitalizar y centralizar el proceso de preinscripción, aprobación, seguimiento y control de aspirantes a **Cadetes y Agentes**.
 
@@ -19,7 +19,7 @@ Cada rol posee permisos, pantallas y funcionalidades específicas, cumpliendo co
 
 ---
 
-## 🎯 Objetivo del Proyecto
+## Objetivo del Proyecto
 Digitalizar el proceso de inscripciones mediante:
 - Carga digital de datos personales
 - Gestión de trámites
