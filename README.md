@@ -2,7 +2,6 @@
 Proyecto Final – Tecnicatura Superior en Análisis de Sistemas  
 Autora: **Carla Denise Acevedo**
 
----
 
 ##  Descripción General del Sistema
 
@@ -17,7 +16,6 @@ El sistema contempla diferentes roles operativos:
 
 Cada rol posee permisos, pantallas y funcionalidades específicas, cumpliendo con un flujo formal y trazable de procesamiento administrativo.
 
----
 
 ## Objetivo del Proyecto
 Digitalizar el proceso de inscripciones mediante:
@@ -29,6 +27,6 @@ Digitalizar el proceso de inscripciones mediante:
 - Visualización segmentada por escalafón
 - Control jerárquico de aprobadores y oficiales
 
----
+
 
 
