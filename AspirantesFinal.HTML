@@ -1,0 +1,1564 @@
+<!doctype html>
+<html lang="es">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>SGI – Perfil del Aspirante</title>
+
+  <!-- Bootstrap -->
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.css" rel="stylesheet">
+
+  <style>
+    body {
+      background-color: #eef2f7;
+      font-family: 'Segoe UI', sans-serif;
+    }
+
+    /* =================== CABECERA =================== */
+
+    header {
+      background: #003366;
+      color: white;
+      padding: 10px 18px;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.25);
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      flex-wrap: wrap;
+      gap: 10px;
+    }
+
+    .header-left {
+      display: flex;
+      align-items: center;
+      gap: 14px;
+    }
+
+    /* Avatar con neón reutilizable (escudo y foto aspirante) */
+    .neon-avatar {
+      width: 64px;
+      height: 64px;
+      border-radius: 50%;
+      padding: 3px;
+      background: radial-gradient(circle, #00eaff, #003366 70%);
+      box-shadow: 0 0 12px rgba(0,255,255,0.9);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .neon-avatar img {
+      width: 100%;
+      height: 100%;
+      border-radius: 50%;
+      object-fit: cover;
+      background: #ffffff;
+    }
+
+    .header-title {
+      display: flex;
+      flex-direction: column;
+      line-height: 1.1;
+    }
+
+    .header-title span.small-label {
+      font-size: 13px;
+      opacity: 0.85;
+    }
+
+    .header-title span.main-title {
+      font-size: 22px;
+      font-weight: 700;
+      letter-spacing: 0.5px;
+    }
+
+    .header-buttons {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      flex-wrap: wrap;
+    }
+
+    .btn-ayuda {
+      background: linear-gradient(135deg, #00eaff, #00c2ff);
+      color: #003366;
+      font-weight: 700;
+      padding: 10px 18px;
+      border-radius: 12px;
+      border: none;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      font-size: 15px;
+      box-shadow: 0 0 12px rgba(0,255,255,0.7);
+      transition: 0.2s;
+      white-space: nowrap;
+    }
+
+    .btn-ayuda:hover {
+      background: linear-gradient(135deg, #55f3ff, #33d5ff);
+      box-shadow: 0 0 18px rgba(0,255,255,0.9);
+    }
+
+    .btn-cerrar-sesion {
+      background: #ffffff;
+      color: #003366;
+      border: 2px solid #003366;
+      padding: 10px 18px;
+      font-size: 15px;
+      font-weight: 700;
+      border-radius: 999px;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      transition: 0.2s ease;
+      white-space: nowrap;
+    }
+
+    .btn-cerrar-sesion:hover {
+      background: #e6f1ff;
+      border-color: #0059b3;
+      box-shadow: 0 0 10px rgba(0,90,180,0.4);
+    }
+
+    @media (max-width: 768px) {
+      header {
+        flex-direction: column;
+        align-items: flex-start;
+      }
+
+      .header-left {
+        width: 100%;
+      }
+
+      .header-buttons {
+        width: 100%;
+        flex-direction: column;
+      }
+
+      .btn-ayuda,
+      .btn-cerrar-sesion {
+        width: 100%;
+        justify-content: center;
+      }
+    }
+
+    /* =================== PANEL IZQUIERDO (PERFIL) =================== */
+
+    .sidebar {
+      background-color: white;
+      border-radius: 18px;
+      padding: 20px 18px;
+      box-shadow: 0 0 10px rgba(0,0,0,0.08);
+      position: relative;
+      overflow: hidden;
+    }
+
+    .sidebar::before {
+      content: "";
+      position: absolute;
+      top: -50px;
+      right: -50px;
+      width: 120px;
+      height: 120px;
+      border-radius: 50%;
+      background: radial-gradient(circle, rgba(0,174,255,0.5), transparent 70%);
+      opacity: 0.4;
+    }
+
+    .photo-box {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 10px;
+    }
+
+    /* Foto aspirante más grande con neón */
+    .photo-neon {
+      width: 150px;
+      height: 150px;
+      border-radius: 50%;
+      padding: 4px;
+      background: radial-gradient(circle, #00eaff, #003366 70%);
+      box-shadow: 0 0 16px rgba(0,255,255,0.95);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .photo-neon img {
+      width: 100%;
+      height: 100%;
+      border-radius: 50%;
+      object-fit: cover;
+      background: #ffffff;
+    }
+
+    .badge-escalafon {
+      font-size: 11px;
+      letter-spacing: 0.5px;
+      text-transform: uppercase;
+    }
+
+    /* Datos personales más destacados */
+    .datos-personales-card {
+      margin-top: 18px;
+      border-radius: 16px;
+      border: 1px solid rgba(0,0,0,0.06);
+      overflow: hidden;
+    }
+
+    .datos-header {
+      background: linear-gradient(135deg, #003366, #0066aa);
+      color: #fff;
+      padding: 8px 12px;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      font-size: 14px;
+      font-weight: 600;
+    }
+
+    .datos-body {
+      padding: 10px 14px 12px;
+      background: #f7f9fc;
+    }
+
+    .datos-body p {
+      margin-bottom: 4px;
+      font-size: 14px;
+    }
+
+    .datos-label {
+      font-weight: 600;
+      color: #003366;
+    }
+
+    /* =================== CARDS GENERALES =================== */
+
+    .card {
+      border-radius: 16px;
+      box-shadow: 0 0 10px rgba(0,0,0,0.06);
+      border: none;
+    }
+
+    /* Progreso trámite */
+    .progress-upgraded {
+      height: 35px !important;
+      background: #dce6f5;
+      border-radius: 20px;
+      padding: 4px;
+      border: 2px solid #003366;
+    }
+
+    .progress-bar-upgraded {
+      background: linear-gradient(90deg, #15cdd3, #5dc2db, #DFF7F0);
+      background-size: 300% 300%;
+      animation: gradientMove 5s ease infinite;
+      border-radius: 15px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-weight: bold;
+      color: white;
+      text-shadow: 1px 1px 2px #040683;
+    }
+
+    @keyframes gradientMove {
+      0% { background-position: 0% 50%; }
+      50% { background-position: 100% 50%; }
+      100% { background-position: 0% 50%; }
+    }
+
+    /* =================== MENSAJES CON EL APROBADOR =================== */
+
+    .messages-card {
+      border-radius: 18px;
+      background: radial-gradient(circle at top left, #e0f2ff 0, #ffffff 45%, #eef6ff 100%);
+      box-shadow: 0 8px 20px rgba(0,40,80,0.15);
+      border: 1px solid rgba(0,60,120,0.15);
+      overflow: hidden;
+    }
+
+    .messages-header {
+      background: linear-gradient(135deg, #003366, #006fba);
+      color: #ffffff;
+      padding: 10px 14px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 8px;
+    }
+
+    .messages-header-left {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      font-size: 14px;
+      font-weight: 600;
+    }
+
+    .status-dot {
+      width: 10px;
+      height: 10px;
+      border-radius: 50%;
+      background: #14f195;
+      box-shadow: 0 0 8px rgba(20,241,149,0.9);
+      animation: pulse 1.8s infinite;
+    }
+
+    @keyframes pulse {
+      0% { transform: scale(1); opacity: 1; }
+      50% { transform: scale(1.25); opacity: 0.6; }
+      100% { transform: scale(1); opacity: 1; }
+    }
+
+    .messages-body {
+      padding: 10px 14px 12px;
+    }
+
+    .message-box {
+      background: rgba(255,255,255,0.9);
+      border-radius: 12px;
+      padding: 10px 12px;
+      height: 220px;
+      overflow-y: auto;
+      border: 1px solid #cfd6e1;
+    }
+
+    .msg-bubble-aprobador {
+      background: #003366;
+      color: #ffffff;
+      padding: 8px 10px;
+      border-radius: 12px 12px 12px 4px;
+      margin-bottom: 6px;
+      font-size: 13px;
+    }
+
+    .msg-bubble-yo {
+      background: #e8f3ff;
+      color: #003366;
+      padding: 8px 10px;
+      border-radius: 12px 12px 4px 12px;
+      margin-bottom: 6px;
+      font-size: 13px;
+      text-align: right;
+    }
+
+    .msg-time {
+      display: block;
+      font-size: 11px;
+      opacity: 0.8;
+      margin-top: 2px;
+    }
+
+    /* =================== ALERTAS DERECHA =================== */
+
+    .alert-panel {
+      background: #ffffff;
+      border-radius: 18px;
+      padding: 14px 14px 10px;
+      box-shadow: 0 0 10px rgba(0,0,0,0.08);
+      border: 1px solid rgba(0,0,0,0.04);
+    }
+
+    .alert-panel h6 {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      margin-bottom: 10px;
+    }
+
+    /* Alerta súper importante visible */
+    .alert-important {
+      border-radius: 14px;
+      padding: 10px 12px;
+      margin-bottom: 10px;
+      background: linear-gradient(135deg, #ffb347, #ff5f6d);
+      color: #fff;
+      display: flex;
+      align-items: flex-start;
+      gap: 8px;
+      box-shadow: 0 0 15px rgba(255,100,80,0.6);
+      font-size: 13px;
+    }
+
+    .alert-important-icon {
+      font-size: 18px;
+      margin-top: 1px;
+    }
+
+    .alert-important strong {
+      display: block;
+      font-size: 13px;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+    }
+
+    /* Lista de alertas "normales" */
+    .list-group-item {
+      font-size: 13px;
+      padding: 6px 8px;
+    }
+
+    /* =================== CHATBOT FLOTANTE =================== */
+
+    #chatButton {
+      position: fixed;
+      bottom: 25px;
+      right: 25px;
+      width: 80px;
+      height: 80px;
+      border-radius: 50%;
+      background: #003366;
+      border: none;
+      box-shadow: 0 8px 22px rgba(0,0,0,0.35);
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      z-index: 9999;
+      padding: 0;
+    }
+
+    #chatButton img {
+      width: 55px;
+      height: 55px;
+      border-radius: 50%;
+      object-fit: cover;
+      border: 3px solid #15cdd3;
+      background-color: #ffffff;
+    }
+
+    .chatbot-window {
+      position: fixed;
+      bottom: 115px;
+      right: 25px;
+      width: 380px;
+      height: 520px;
+      background: #ffffff;
+      border-radius: 20px;
+      box-shadow: 0 10px 35px rgba(0,0,0,0.25);
+      display: none;
+      flex-direction: column;
+      overflow: hidden;
+      z-index: 9999;
+    }
+
+    .chatbot-header {
+      background: linear-gradient(135deg, #003366, #015190);
+      color: #ffffff;
+      padding: 10px 14px;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .chatbot-header img {
+      width: 32px;
+      height: 32px;
+      border-radius: 50%;
+      object-fit: cover;
+      border: 2px solid #15cdd3;
+      background: #ffffff;
+    }
+
+    .chatbot-header-title {
+      font-size: 13px;
+      line-height: 1.2;
+    }
+
+    .chatbot-header-title strong {
+      display: block;
+      font-size: 15px;
+    }
+
+    .chatbot-content {
+      flex: 1;
+      padding: 10px 12px;
+      overflow-y: auto;
+      font-size: 14px;
+      background: #f8f9fa;
+    }
+
+    .chatbot-buttons {
+      padding: 10px;
+      border-top: 1px solid #d0d7e2;
+      background: #ffffff;
+      display: grid;
+      gap: 6px;
+    }
+
+    .chatbot-btn {
+      font-size: 13px;
+      text-align: left;
+      border-radius: 10px;
+    }
+
+    .chat-bubble {
+      padding: 8px 12px;
+      border-radius: 14px;
+      max-width: 80%;
+      line-height: 1.4;
+      margin-bottom: 8px;
+    }
+
+    .bubble-user {
+      background: #d8ecff;
+      align-self: flex-end;
+      margin-left: auto;
+    }
+
+    .bubble-bot {
+      background: #ffffff;
+      border: 1px solid #d0d7e2;
+      margin-right: auto;
+    }
+
+    .bubble-anim {
+      animation: fadeIn 0.25s ease-out;
+    }
+
+    @keyframes fadeIn {
+      from { opacity: 0; transform: translateY(4px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+
+    .typing {
+      display: flex;
+      align-items: center;
+      margin: 8px 0;
+    }
+
+    .typing img {
+      width: 24px;
+      height: 24px;
+      border-radius: 50%;
+      margin-right: 6px;
+      object-fit: cover;
+      border: 2px solid #15cdd3;
+      background:#fff;
+    }
+
+    .typing span {
+      width: 7px;
+      height: 7px;
+      background: #555;
+      border-radius: 50%;
+      margin: 0 2px;
+      animation: typingBlink 1s infinite;
+    }
+
+    @keyframes typingBlink {
+      0% { opacity: .2; }
+      50% { opacity: 1; }
+      100% { opacity: .2; }
+    }
+
+    #btnVolverMenu {
+      width: 100%;
+      margin-top: 8px;
+      padding: 8px;
+      border-radius: 10px;
+      border: 1px solid #ccc;
+      background: #f1f1f1;
+      font-size: 13px;
+    }
+
+    @media (max-width: 576px) {
+      .chatbot-window {
+        width: calc(100% - 30px);
+        right: 15px;
+      }
+    }
+
+  </style>
+</head>
+
+<body>
+
+<!-- =================== HEADER =================== -->
+<header>
+  <div class="header-left">
+    <!-- Escudo con neón (vos subís la imagen en ese src) -->
+    <div class="neon-avatar">
+      <img src="Captura de pantalla 2025-09-07 185933.png" alt="Escudo PFA">
+    </div>
+    <div class="header-title">
+      <span class="small-label">Sistema de Gestión de Inscripciones</span>
+      <span class="main-title">SGI – Perfil del Aspirante</span>
+    </div>
+  </div>
+
+  <div class="header-buttons">
+    <button class="btn-ayuda" data-bs-toggle="modal" data-bs-target="#modalAyuda">
+      <i class="bi bi-question-circle-fill"></i> Ayuda
+    </button>
+
+    <button class="btn-cerrar-sesion">
+      <i class="bi bi-box-arrow-right"></i> Cerrar sesión
+    </button>
+  </div>
+</header>
+
+<!-- =================== CONTENIDO PRINCIPAL =================== -->
+
+<div class="container-fluid mt-4">
+  <div class="row g-3">
+
+    <!-- ========== COLUMNA IZQUIERDA (PERFIL) ========== -->
+    <div class="col-md-3">
+      <div class="sidebar">
+
+        <div class="photo-box mb-2">
+          <!-- Foto aspirante con neón -->
+          <div class="photo-neon">
+            <img src="Foto aspirante.png" alt="Foto aspirante">
+          </div>
+          <button class="btn btn-outline-primary btn-sm mt-2">
+            <i class="bi bi-upload"></i> Subir foto
+          </button>
+        </div>
+
+        <!-- Datos personales destacados -->
+        <div class="datos-personales-card">
+          <div class="datos-header">
+            <i class="bi bi-person-badge"></i> Datos personales del aspirante
+          </div>
+          <div class="datos-body">
+            <p><span class="datos-label">Nombre:</span> Juan Pérez</p>
+            <p><span class="datos-label">DNI:</span> 40.123.456</p>
+            <p>
+              <span class="datos-label">Cargo:</span>
+              <span class="badge bg-primary badge-escalafon">Agente</span>
+              <span class="datos-label">Escalafón:</span>
+              <span class="badge bg-primary badge-escalafon">Seguridad</span>
+            </p>
+            <p>
+              <span class="datos-label">Estado:</span>
+              <span class="badge bg-warning text-dark">En trámite</span>
+            </p>
+          </div>
+        </div>
+
+      </div>
+    </div>
+
+    <!-- ========== COLUMNA CENTRAL ========== -->
+    <div class="col-md-6">
+
+      <!-- Estado del trámite -->
+      <div class="card mb-3">
+        <div class="card-body">
+          <h6 class="mb-2"><i class="bi bi-flag-fill me-1"></i> Estado del trámite</h6>
+          <div class="progress progress-upgraded mt-3">
+            <div class="progress-bar progress-bar-upgraded" style="width: 35%;">
+              <span>35%</span>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Documentación requerida -->
+      <div class="card mb-3">
+        <div class="card-body">
+
+          <h6 class="mb-3"><i class="bi bi-folder-check"></i> Documentación requerida</h6>
+          <p class="text-muted mb-2">Hacé clic en cada categoría para desplegar los documentos.</p>
+
+          <div class="accordion" id="docAccordion">
+
+            <!-- 1️⃣ IDENTIDAD Y DATOS PERSONALES -->
+            <div class="accordion-item">
+              <h2 class="accordion-header">
+                <button class="accordion-button" data-bs-toggle="collapse" data-bs-target="#grupoIdentidad">
+                  1️⃣ IDENTIDAD Y DATOS PERSONALES
+                </button>
+              </h2>
+
+              <div id="grupoIdentidad" class="accordion-collapse collapse show" data-bs-parent="#docAccordion">
+                <div class="accordion-body">
+                  <div class="accordion" id="identidad">
+
+                    <!-- Foto cuerpo entero -->
+                    <div class="accordion-item">
+                      <h2 class="accordion-header">
+                        <button class="accordion-button collapsed" data-bs-toggle="collapse" data-bs-target="#idFotoEntero">
+                          Foto de cuerpo entero <span class="badge bg-warning text-dark ms-2">Pendiente</span>
+                        </button>
+                      </h2>
+                      <div id="idFotoEntero" class="accordion-collapse collapse">
+                        <div class="accordion-body">
+                          <input type="file" class="form-control mb-2">
+                          <button class="btn btn-primary btn-sm">Subir</button>
+                        </div>
+                      </div>
+                    </div>
+
+                    <!-- Foto 4x4 -->
+                    <div class="accordion-item">
+                      <h2 class="accordion-header">
+                        <button class="accordion-button collapsed" data-bs-toggle="collapse" data-bs-target="#idFoto4x4">
+                          Foto 4x4 <span class="badge bg-warning text-dark ms-2">Pendiente</span>
+                        </button>
+                      </h2>
+                      <div id="idFoto4x4" class="accordion-collapse collapse">
+                        <div class="accordion-body">
+                          <input type="file" class="form-control mb-2">
+                          <button class="btn btn-primary btn-sm">Subir</button>
+                        </div>
+                      </div>
+                    </div>
+
+                    <!-- DNI -->
+                    <div class="accordion-item">
+                      <h2 class="accordion-header">
+                        <button class="accordion-button collapsed" data-bs-toggle="collapse" data-bs-target="#idDNI">
+                          DNI Anverso y Reverso
+                          <span class="badge bg-warning text-dark ms-2">Pendiente</span>
+                        </button>
+                      </h2>
+                      <div id="idDNI" class="accordion-collapse collapse">
+                        <div class="accordion-body">
+                          <input type="file" class="form-control mb-2">
+                          <button class="btn btn-primary btn-sm">Subir</button>
+                        </div>
+                      </div>
+                    </div>
+
+                    <!-- Certificado de nacimiento -->
+                    <div class="accordion-item">
+                      <h2 class="accordion-header">
+                        <button class="accordion-button collapsed" data-bs-toggle="collapse" data-bs-target="#idCertNacimiento">
+                          Certificado de nacimiento
+                          <span class="badge bg-warning text-dark ms-2">Pendiente</span>
+                        </button>
+                      </h2>
+                      <div id="idCertNacimiento" class="accordion-collapse collapse">
+                        <div class="accordion-body">
+                          <input type="file" class="form-control mb-2">
+                          <button class="btn btn-primary btn-sm">Subir</button>
+                        </div>
+                      </div>
+                    </div>
+
+                    <!-- CUIL / CUIT -->
+                    <div class="accordion-item">
+                      <h2 class="accordion-header">
+                        <button class="accordion-button collapsed" data-bs-toggle="collapse" data-bs-target="#idCuil">
+                          CUIL / CUIT 
+                          <span class="badge bg-warning text-dark ms-2">Pendiente</span>
+                        </button>
+                      </h2>
+                      <div id="idCuil" class="accordion-collapse collapse">
+                        <div class="accordion-body">
+                          <input type="file" class="form-control mb-2">
+                          <button class="btn btn-primary btn-sm">Subir</button>
+                        </div>
+                      </div>
+                    </div>
+
+                    <!-- Negativa ANSES -->
+                    <div class="accordion-item">
+                      <h2 class="accordion-header">
+                        <button class="accordion-button collapsed" data-bs-toggle="collapse" data-bs-target="#idNegativa">
+                          Negativa ANSES
+                          <span class="badge bg-warning text-dark ms-2">Pendiente</span>
+                        </button>
+                      </h2>
+                      <div id="idNegativa" class="accordion-collapse collapse">
+                        <div class="accordion-body">
+                          <input type="file" class="form-control mb-2">
+                          <button class="btn btn-primary btn-sm">Subir</button>
+                        </div>
+                      </div>
+                    </div>
+
+                    <!-- Título -->
+                    <div class="accordion-item">
+                      <h2 class="accordion-header">
+                        <button class="accordion-button collapsed" data-bs-toggle="collapse" data-bs-target="#idTitulo">
+                          Título secundario / terciario / universitario
+                          <span class="badge bg-warning text-dark ms-2">Pendiente</span>
+                        </button>
+                      </h2>
+                      <div id="idTitulo" class="accordion-collapse collapse">
+                        <div class="accordion-body">
+                          <input type="file" class="form-control mb-2">
+                          <button class="btn btn-primary btn-sm">Subir archivo</button>
+                        </div>
+                      </div>
+                    </div>
+
+                    <!-- Licencia -->
+                    <div class="accordion-item">
+                      <h2 class="accordion-header">
+                        <button class="accordion-button collapsed" data-bs-toggle="collapse" data-bs-target="#idLicencia">
+                          Licencia de conducir (si corresponde)
+                          <span class="badge bg-warning text-dark ms-2">Pendiente</span>
+                        </button>
+                      </h2>
+                      <div id="idLicencia" class="accordion-collapse collapse">
+                        <div class="accordion-body">
+                          <input type="file" class="form-control mb-2">
+                          <button class="btn btn-primary btn-sm">Subir</button>
+                        </div>
+                      </div>
+                    </div>
+
+                    <!-- Prestación servicios otra fuerza -->
+                    <div class="accordion-item">
+                      <h2 class="accordion-header">
+                        <button class="accordion-button collapsed" data-bs-toggle="collapse" data-bs-target="#idServicios">
+                          Prestación de Servicios en otra fuerza (si corresponde)
+                          <span class="badge bg-warning ms-2 text-dark">Pendiente</span>
+                        </button>
+                      </h2>
+                      <div id="idServicios" class="accordion-collapse collapse">
+                        <div class="accordion-body">
+                          <input type="file" class="form-control mb-2">
+                          <button class="btn btn-primary btn-sm">Subir</button>
+                        </div>
+                      </div>
+                    </div>
+
+                    <!-- F.1927 -->
+                    <div class="accordion-item">
+                      <h2 class="accordion-header">
+                        <button class="accordion-button collapsed" data-bs-toggle="collapse" data-bs-target="#idF1927">
+                          Formulario 1927 (F.1927)
+                          <span class="badge bg-warning text-dark ms-2">Pendiente</span>
+                        </button>
+                      </h2>
+                      <div id="idF1927" class="accordion-collapse collapse">
+                        <div class="accordion-body">
+                          <p class="text-muted">Descargá el F.1927, completalo y subilo firmado.</p>
+                          <a href="/archivos/formulario_1927.pdf" class="btn btn-outline-primary btn-sm mb-3" download>
+                            <i class="bi bi-download"></i> Descargar F.1927
+                          </a>
+                          <input type="file" class="form-control mb-2">
+                          <button class="btn btn-primary btn-sm">
+                            <i class="bi bi-cloud-upload"></i> Subir archivo
+                          </button>
+                        </div>
+                      </div>
+                    </div>
+
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <!-- 2️⃣ DOCUMENTACIÓN DE FAMILIARES -->
+            <div class="accordion-item">
+              <h2 class="accordion-header">
+                <button class="accordion-button collapsed" data-bs-toggle="collapse" data-bs-target="#grupoFamiliar">
+                  2️⃣ DOCUMENTACIÓN DE FAMILIARES
+                </button>
+              </h2>
+
+              <div id="grupoFamiliar" class="accordion-collapse collapse" data-bs-parent="#docAccordion">
+                <div class="accordion-body">
+                  <div class="accordion">
+
+                    <div class="accordion-item">
+                      <h2 class="accordion-header">
+                        <button class="accordion-button collapsed" data-bs-toggle="collapse" data-bs-target="#famMatrimonio">
+                          Certificado matrimonio/divorcio (si corresponde)
+                          <span class="badge bg-warning text-dark ms-2">Pendiente</span>
+                        </button>
+                      </h2>
+                      <div id="famMatrimonio" class="accordion-collapse collapse">
+                        <div class="accordion-body">
+                          <input type="file" class="form-control mb-2">
+                          <button class="btn btn-primary btn-sm">Subir</button>
+                        </div>
+                      </div>
+                    </div>
+
+                    <div class="accordion-item">
+                      <h2 class="accordion-header">
+                        <button class="accordion-button collapsed" data-bs-toggle="collapse" data-bs-target="#famHijos">
+                          Certificado de nacimiento de hijos
+                          <span class="badge bg-warning text-dark ms-2">Pendiente</span>
+                        </button>
+                      </h2>
+                      <div id="famHijos" class="accordion-collapse collapse">
+                        <div class="accordion-body">
+                          <input type="file" class="form-control mb-2">
+                          <button class="btn btn-primary btn-sm">Subir</button>
+                        </div>
+                      </div>
+                    </div>
+
+                    <div class="accordion-item">
+                      <h2 class="accordion-header">
+                        <button class="accordion-button collapsed" data-bs-toggle="collapse" data-bs-target="#famDefuncion">
+                          Certificado de defunción (si corresponde)
+                          <span class="badge bg-warning text-dark ms-2">Pendiente</span>
+                        </button>
+                      </h2>
+                      <div id="famDefuncion" class="accordion-collapse collapse">
+                        <div class="accordion-body">
+                          <input type="file" class="form-control mb-2">
+                          <button class="btn btn-primary btn-sm">Subir</button>
+                        </div>
+                      </div>
+                    </div>
+
+                    <div class="accordion-item">
+                      <h2 class="accordion-header">
+                        <button class="accordion-button collapsed" data-bs-toggle="collapse" data-bs-target="#famPFA">
+                          Familiar en P.F.A. (credencial)
+                          <span class="badge bg-warning text-dark ms-2">Pendiente</span>
+                        </button>
+                      </h2>
+                      <div id="famPFA" class="accordion-collapse collapse">
+                        <div class="accordion-body">
+                          <input type="file" class="form-control mb-2">
+                          <button class="btn btn-primary btn-sm">Subir</button>
+                        </div>
+                      </div>
+                    </div>
+
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <!-- 3️⃣ ANTECEDENTES / JUDICIALES -->
+            <div class="accordion-item">
+              <h2 class="accordion-header">
+                <button class="accordion-button collapsed" data-bs-toggle="collapse" data-bs-target="#grupoAntecedentes">
+                  3️⃣ ANTECEDENTES / JUDICIALES
+                </button>
+              </h2>
+
+              <div id="grupoAntecedentes" class="accordion-collapse collapse" data-bs-parent="#docAccordion">
+                <div class="accordion-body">
+                  <div class="accordion">
+
+                    <div class="accordion-item">
+                      <h2 class="accordion-header">
+                        <button class="accordion-button collapsed" data-bs-toggle="collapse" data-bs-target="#judAspirante">
+                          Certificado de reincidencia (aspirante)
+                          <span class="badge bg-warning text-dark ms-2">Pendiente</span>
+                        </button>
+                      </h2>
+                      <div id="judAspirante" class="accordion-collapse collapse">
+                        <div class="accordion-body">
+                          <input type="file" class="form-control mb-2">
+                          <button class="btn btn-primary btn-sm">Subir</button>
+                        </div>
+                      </div>
+                    </div>
+
+                    <div class="accordion-item">
+                      <h2 class="accordion-header">
+                        <button class="accordion-button collapsed" data-bs-toggle="collapse" data-bs-target="#judGrupo">
+                          Cert. Reincidencia + DNI grupo familiar
+                          <span class="badge bg-warning text-dark ms-2">Pendiente</span>
+                        </button>
+                      </h2>
+                      <div id="judGrupo" class="accordion-collapse collapse">
+                        <div class="accordion-body">
+                          <input type="file" class="form-control mb-2">
+                          <button class="btn btn-primary btn-sm">Subir</button>
+                        </div>
+                      </div>
+                    </div>
+
+                    <div class="accordion-item">
+                      <h2 class="accordion-header">
+                        <button class="accordion-button collapsed" data-bs-toggle="collapse" data-bs-target="#judProv">
+                          Cert. Antecedentes provinciales / locales
+                          <span class="badge bg-warning text-dark ms-2">Pendiente</span>
+                        </button>
+                      </h2>
+                      <div id="judProv" class="accordion-collapse collapse">
+                        <div class="accordion-body">
+                          <input type="file" class="form-control mb-2">
+                          <button class="btn btn-primary btn-sm">Subir</button>
+                        </div>
+                      </div>
+                    </div>
+
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <!-- 4️⃣ ESTUDIOS MÉDICOS -->
+            <div class="accordion-item">
+              <h2 class="accordion-header">
+                <button class="accordion-button collapsed" data-bs-toggle="collapse" data-bs-target="#grupoSalud">
+                  4️⃣ ESTUDIOS MÉDICOS
+                </button>
+              </h2>
+
+              <div id="grupoSalud" class="accordion-collapse collapse" data-bs-parent="#docAccordion">
+                <div class="accordion-body">
+                  <div class="accordion">
+
+                    <!-- Fecha pre-médico (solo lectura) -->
+                    <div class="accordion-item">
+                      <h2 class="accordion-header">
+                        <button class="accordion-button collapsed" data-bs-toggle="collapse" data-bs-target="#salPremed">
+                          Fecha pre-médico
+                          <span class="badge bg-info text-dark ms-2">Solo lectura</span>
+                        </button>
+                      </h2>
+                      <div id="salPremed" class="accordion-collapse collapse">
+                        <div class="accordion-body">
+                          <p class="text-muted mb-1">Esta es la fecha en la que asististe al pre-médico.</p>
+                          <div class="alert alert-secondary mb-0">
+                            <strong>Fecha:</strong> <span id="fechaPremedico">Aún sin cargar</span>
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+
+                    <!-- Estudios médicos (solo fecha, sin subir nada) -->
+                    <div class="accordion-item">
+                      <h2 class="accordion-header">
+                        <button class="accordion-button collapsed" data-bs-toggle="collapse" data-bs-target="#salEstudiosFecha">
+                          Estudios médicos – Fecha de presentación
+                          <span class="badge bg-info text-dark ms-2">Solo lectura</span>
+                        </button>
+                      </h2>
+                      <div id="salEstudiosFecha" class="accordion-collapse collapse">
+                        <div class="accordion-body">
+                          <p class="text-muted mb-1">Fecha en la que presentaste los estudios médicos completos.</p>
+                          <div class="alert alert-secondary mb-0">
+                            <strong>Fecha:</strong> <span id="fechaEstudiosMedicos">Aún sin cargar</span>
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+
+                    <!-- Listado estudios (solo descarga) -->
+                    <div class="accordion-item">
+                      <h2 class="accordion-header">
+                        <button class="accordion-button collapsed" data-bs-toggle="collapse" data-bs-target="#salListado">
+                          Listado de estudios médicos
+                          <span class="badge bg-info text-dark ms-2">Solo lectura</span>
+                        </button>
+                      </h2>
+                      <div id="salListado" class="accordion-collapse collapse">
+                        <div class="accordion-body">
+                          <p class="text-muted">Descargá el listado completo.</p>
+                          <a href="/archivos/listado_estudios_medicos.pdf"
+                             class="btn btn-outline-primary btn-sm" download>
+                            <i class="bi bi-download"></i> Descargar PDF
+                          </a>
+                        </div>
+                      </div>
+                    </div>
+
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <!-- 5️⃣ AMBIENTAL Y DOMICILIO -->
+            <div class="accordion-item">
+              <h2 class="accordion-header">
+                <button class="accordion-button collapsed" data-bs-toggle="collapse" data-bs-target="#grupoAmbiental">
+                  5️⃣ AMBIENTAL Y DOMICILIO
+                </button>
+              </h2>
+
+              <div id="grupoAmbiental" class="accordion-collapse collapse" data-bs-parent="#docAccordion">
+                <div class="accordion-body">
+                  <div class="accordion">
+
+                    <!-- AMBA -->
+                    <div class="accordion-item">
+                      <h2 class="accordion-header">
+                        <button class="accordion-button collapsed" data-bs-toggle="collapse" data-bs-target="#ambAMBA">
+                          Formulario Ambiental AMBA
+                          <span class="badge bg-warning text-dark ms-2">Pendiente</span>
+                        </button>
+                      </h2>
+                      <div id="ambAMBA" class="accordion-collapse collapse">
+                        <div class="accordion-body">
+                          <input type="file" class="form-control mb-2">
+                          <button class="btn btn-primary btn-sm">Subir</button>
+                        </div>
+                      </div>
+                    </div>
+
+                    <!-- Delegación -->
+                    <div class="accordion-item">
+                      <h2 class="accordion-header">
+                        <button class="accordion-button collapsed" data-bs-toggle="collapse" data-bs-target="#ambDeleg">
+                          Formulario Ambiental Delegación
+                          <span class="badge bg-warning text-dark ms-2">Pendiente</span>
+                        </button>
+                      </h2>
+                      <div id="ambDeleg" class="accordion-collapse collapse">
+                        <div class="accordion-body">
+                          <input type="file" class="form-control mb-2">
+                          <button class="btn btn-primary btn-sm">Subir</button>
+                        </div>
+                      </div>
+                    </div>
+
+                    <!-- Plano (solo descarga) -->
+                    <div class="accordion-item">
+                      <h2 class="accordion-header">
+                        <button class="accordion-button collapsed" data-bs-toggle="collapse" data-bs-target="#ambPlano">
+                          Formulario Ambiental + Plano
+                          <span class="badge bg-info text-dark ms-2">Solo lectura</span>
+                        </button>
+                      </h2>
+                      <div id="ambPlano" class="accordion-collapse collapse">
+                        <div class="accordion-body">
+                          <p class="text-muted">Descargá el archivo.</p>
+                          <a href="/archivos/formulario_ambiental_plano.pdf"
+                             class="btn btn-outline-primary btn-sm" download>
+                            <i class="bi bi-download"></i> Descargar PDF
+                          </a>
+                        </div>
+                      </div>
+                    </div>
+
+                    <!-- Vecinos -->
+                    <div class="accordion-item">
+                      <h2 class="accordion-header">
+                        <button class="accordion-button collapsed" data-bs-toggle="collapse" data-bs-target="#ambVecinos">
+                          Datos de vecinos
+                          <span class="badge bg-warning text-dark ms-2">Pendiente</span>
+                        </button>
+                      </h2>
+                      <div id="ambVecinos" class="accordion-collapse collapse">
+                        <div class="accordion-body">
+                          <input type="file" class="form-control mb-2">
+                          <button class="btn btn-primary btn-sm">Subir</button>
+                        </div>
+                      </div>
+                    </div>
+
+                    <!-- Fotos del domicilio -->
+                    <div class="accordion-item">
+                      <h2 class="accordion-header">
+                        <button class="accordion-button collapsed" data-bs-toggle="collapse" data-bs-target="#ambFotos">
+                          Fotos del domicilio
+                          <span class="badge bg-warning text-dark ms-2">Pendiente</span>
+                        </button>
+                      </h2>
+                      <div id="ambFotos" class="accordion-collapse collapse">
+                        <div class="accordion-body">
+                          <input type="file" class="form-control mb-2">
+                          <button class="btn btn-primary btn-sm">Subir</button>
+                        </div>
+                      </div>
+                    </div>
+
+                    <!-- Certificado de domicilio -->
+                    <div class="accordion-item">
+                      <h2 class="accordion-header">
+                        <button class="accordion-button collapsed" data-bs-toggle="collapse" data-bs-target="#ambCert">
+                          Certificado de domicilio
+                          <span class="badge bg-warning text-dark ms-2">Pendiente</span>
+                        </button>
+                      </h2>
+                      <div id="ambCert" class="accordion-collapse collapse">
+                        <div class="accordion-body">
+                          <input type="file" class="form-control mb-2">
+                          <button class="btn btn-primary btn-sm">Subir</button>
+                        </div>
+                      </div>
+                    </div>
+
+                    <!-- Respuesta S.A.C.I -->
+                    <div class="accordion-item">
+                      <h2 class="accordion-header">
+                        <button class="accordion-button collapsed" data-bs-toggle="collapse" data-bs-target="#ambSaci">
+                          Respuesta S.A.C.I
+                          <span class="badge bg-warning text-dark ms-2">Pendiente</span>
+                        </button>
+                      </h2>
+                      <div id="ambSaci" class="accordion-collapse collapse">
+                        <div class="accordion-body">
+                          <input type="file" class="form-control mb-2">
+                          <button class="btn btn-primary btn-sm">Subir</button>
+                        </div>
+                      </div>
+                    </div>
+
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <!-- 6️⃣ ANEXOS / FORMALIZACIÓN -->
+            <div class="accordion-item">
+              <h2 class="accordion-header">
+                <button class="accordion-button collapsed" data-bs-toggle="collapse" data-bs-target="#grupoFinal">
+                  6️⃣ ANEXOS / FORMALIZACIÓN
+                </button>
+              </h2>
+
+              <div id="grupoFinal" class="accordion-collapse collapse" data-bs-parent="#docAccordion">
+                <div class="accordion-body">
+                  <div class="accordion">
+
+                    
+                    <!-- Diligencia unificada -->
+                    <div class="accordion-item">
+                      <h2 class="accordion-header">
+                        <button class="accordion-button collapsed" data-bs-toggle="collapse" data-bs-target="#finalDiligencia">
+                          Diligencia unificada
+                          <span class="badge bg-warning text-dark ms-2">Pendiente</span>
+                        </button>
+                      </h2>
+                      <div id="finalDiligencia" class="accordion-collapse collapse">
+                        <div class="accordion-body">
+                          <p class="text-muted">
+                            Descargá el formulario oficial, completalo y subilo firmado.
+                          </p>
+                          <a href="/archivos/diligencia_unificada.pdf"
+                             class="btn btn-outline-primary btn-sm mb-3" download>
+                            <i class="bi bi-download"></i> Descargar diligencia unificada
+                          </a>
+                          <input type="file" class="form-control mb-2">
+                          <button class="btn btn-primary btn-sm">
+                            <i class="bi bi-cloud-upload"></i> Subir archivo
+                          </button>
+                        </div>
+                      </div>
+                    </div>
+
+                    
+
+                    <!-- Fecha formalización -->
+                    <div class="accordion-item">
+                      <h2 class="accordion-header">
+                        <button class="accordion-button collapsed" data-bs-toggle="collapse" data-bs-target="#finalFormalizacion">
+                          Fecha de formalización
+                          <span class="badge bg-info text-dark ms-2">Solo lectura</span>
+                        </button>
+                      </h2>
+                      <div id="finalFormalizacion" class="accordion-collapse collapse">
+                        <div class="accordion-body">
+                          <p class="text-muted">Fecha cargada por el formalizador.</p>
+                          <div class="alert alert-secondary">
+                            <strong>Fecha:</strong> <span id="fechaFormalizacion">Aún sin formalizar</span>
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+
+                  </div>
+                </div>
+              </div>
+            </div>
+
+          </div><!-- /docAccordion -->
+        </div>
+      </div>
+
+      <!-- ========== MENSAJES CON EL APROBADOR ========== -->
+      <div class="messages-card mb-3">
+        <div class="messages-header">
+          <div class="messages-header-left">
+            <span class="status-dot"></span>
+            <span><i class="bi bi-chat-dots me-1"></i> Mensajes con el aprobador</span>
+          </div>
+          <span class="badge bg-light text-primary">Canal directo</span>
+        </div>
+        <div class="messages-body">
+          <div class="message-box mb-2">
+            <div class="msg-bubble-aprobador">
+              <strong>Aprobador:</strong> Buen día Juan. Falta subir el DNI completo.
+              <span class="msg-time">09:15 hs</span>
+            </div>
+            <div class="msg-bubble-yo">
+              <strong>Vos:</strong> Perfecto, ya lo subo.
+              <span class="msg-time">09:17 hs</span>
+            </div>
+          </div>
+
+          <div class="input-group">
+            <input type="text" class="form-control" placeholder="Escribí un mensaje...">
+            <button class="btn btn-primary"><i class="bi bi-send"></i></button>
+          </div>
+        </div>
+      </div>
+
+    </div> <!-- /col-md-6 -->
+
+    <!-- ========== COLUMNA DERECHA (ALERTAS + TURNOS) ========== -->
+    <div class="col-md-3">
+
+      <!-- ALERTAS -->
+      <div class="alert-panel mb-3">
+        <h6><i class="bi bi-bell"></i> Alertas</h6>
+
+        <!-- Alerta importante, bien visible -->
+        <div class="alert-important">
+          <div class="alert-important-icon">
+            <i class="bi bi-exclamation-triangle-fill"></i>
+          </div>
+          <div>
+            <strong>ALERTA IMPORTANTE</strong>
+            Tenés documentación obligatoria pendiente de subir. Revisá el apartado
+            <u>Identidad y datos personales</u> para evitar demoras en tu trámite.
+          </div>
+        </div>
+
+        <ul class="list-group list-group-flush mt-2">
+          <li class="list-group-item">
+            <i class="bi bi-exclamation-circle text-warning"></i> Falta DNI completo.
+          </li>
+          <li class="list-group-item">
+            <i class="bi bi-check-circle text-success"></i> Certificado CUIL cargado.
+          </li>
+        </ul>
+      </div>
+
+      <!-- TURNOS ASIGNADOS -->
+      <div class="card">
+        <div class="card-body">
+          <h6><i class="bi bi-calendar3"></i> Turnos asignados</h6>
+
+          <table class="table table-sm table-bordered mt-2 mb-0">
+            <thead class="table-light">
+            <tr>
+              <th>Fecha</th>
+              <th>Hora</th>
+              <th>Motivo</th>
+            </tr>
+            </thead>
+            <tbody>
+            <tr>
+              <td>15/10/2025</td>
+              <td>09:30</td>
+              <td>Entrevista Médica</td>
+            </tr>
+            <tr>
+              <td>22/10/2025</td>
+              <td>11:00</td>
+              <td>Psicotécnico</td>
+            </tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+    </div><!-- /col-md-3 -->
+
+  </div><!-- /row -->
+</div><!-- /container-fluid -->
+
+<!-- ========== MODAL AYUDA ========== -->
+<div class="modal fade" id="modalAyuda" tabindex="-1" aria-hidden="true">
+  <div class="modal-dialog modal-dialog-centered">
+    <div class="modal-content">
+
+      <div class="modal-header">
+        <h5 class="modal-title">
+          <i class="bi bi-question-circle-fill me-2"></i> Ayuda al aspirante
+        </h5>
+        <button class="btn-close" data-bs-dismiss="modal"></button>
+      </div>
+
+      <div class="modal-body">
+        <p class="mb-2">Seleccioná el tipo de inconveniente:</p>
+        <ul class="small">
+          <li>No pude completar mi pre-inscripción.</li>
+          <li>No me llegó el e-mail de activación.</li>
+          <li>No puedo iniciar sesión.</li>
+          <li>Tengo problemas para subir documentación.</li>
+        </ul>
+        <div class="alert alert-info small mb-0">
+          <i class="bi bi-info-circle"></i> Revisá la bandeja de spam o correo no deseado.
+        </div>
+      </div>
+
+      <div class="modal-footer">
+        <button class="btn btn-primary btn-sm" data-bs-dismiss="modal">Cerrar</button>
+      </div>
+
+    </div>
+  </div>
+</div>
+
+<footer class="mt-4 mb-3 text-center text-muted">
+  © 2025 – Sistema de Gestión de Inscripciones (SGI) – Policía Federal Argentina
+</footer>
+
+<!-- ========== BOTÓN Y VENTANA DEL CHATBOT ========== -->
+
+<button id="chatButton" aria-label="Asistente SGI">
+  <img src="Foto chatbot.png" alt="Chatbot SGI">
+</button>
+
+<div id="chatWindow" class="chatbot-window">
+  <div class="chatbot-header">
+    <img src="Foto chatbot.png" alt="Chatbot SGI">
+    <div class="chatbot-header-title">
+      <strong>Asistente SGI</strong>
+      <span>Preguntas frecuentes del aspirante</span>
+    </div>
+  </div>
+
+  <div id="chatContent" class="chatbot-content">
+    <p class="text-muted">
+      Seleccioná una pregunta de la lista para ver la respuesta.
+    </p>
+  </div>
+
+  <div class="chatbot-buttons">
+    <button class="btn btn-outline-primary chatbot-btn" data-q="documentacion">
+      ❓ No puedo subir documentación
+    </button>
+
+    <button class="btn btn-outline-primary chatbot-btn" data-q="turno">
+      ❓ ¿Cómo reprogramo un turno?
+    </button>
+
+    <button class="btn btn-outline-primary chatbot-btn" data-q="antecedentes">
+      ❓ ¿Dónde realizo el Certificado de Antecedentes?
+    </button>
+
+    <button class="btn btn-outline-primary chatbot-btn" data-q="provinciales">
+      ❓ ¿Dónde hago el Certificado de Antecedentes Provinciales?
+    </button>
+
+    <button class="btn btn-outline-primary chatbot-btn" data-q="titulo">
+      ❓ ¿Dónde legalizo mi título?
+    </button>
+  </div>
+</div>
+
+<!-- =================== SCRIPTS =================== -->
+
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+
+<script>
+  /* ============================
+     RESPUESTAS PREDEFINIDAS
+  ============================ */
+  const respuestas = {
+    documentacion:
+      "📄 <b>No puedo subir documentación</b><br>• Verificá el formato PDF/JPG.<br>• Límite 5MB.<br>• Probá cambiar de navegador.<br>• Si persiste, escribí al encargado desde el chat interno.",
+    turno:
+      "📅 <b>¿Cómo reprogramo un turno?</b><br>Solo puede hacerlo tu aprobador. Enviale mensaje desde el chat indicando el motivo.",
+    antecedentes:
+      "📝 <b>Certificado de Antecedentes Nacionales</b><br>Se tramita en RENAPER o dependencias habilitadas de la Policía Federal Argentina.",
+    provinciales:
+      "🏛 <b>Certificados Provinciales</b><br>Se gestionan en la Policía de tu provincia.",
+    titulo:
+      "🎓 <b>Legalización de título</b><br>En el Ministerio de Educación o en la institución donde cursaste."
+  };
+
+  /* ============================
+     ELEMENTOS DEL DOM
+  ============================ */
+  const chatButton  = document.getElementById("chatButton");
+  const chatWindow  = document.getElementById("chatWindow");
+  const chatContent = document.getElementById("chatContent");
+  const botonesChat = document.querySelectorAll(".chatbot-btn");
+
+  /* Mostrar/ocultar chatbot */
+  chatButton.onclick = () => {
+    chatWindow.style.display = (chatWindow.style.display === "flex") ? "none" : "flex";
+  };
+
+  /* Volver al menú */
+  function volverMenu() {
+    chatContent.innerHTML = `
+      <p class='text-muted'>Seleccioná una pregunta de la lista para ver la respuesta.</p>
+    `;
+    botonesChat.forEach(b => b.style.display = "block");
+  }
+
+  /* Animación “escribiendo...” */
+  function mostrarTyping() {
+    const typing = document.createElement("div");
+    typing.classList.add("typing");
+    typing.innerHTML = `
+      <img src="Foto chatbot.png" alt="">
+      <span></span><span></span><span></span>
+    `;
+    chatContent.appendChild(typing);
+    chatContent.scrollTop = chatContent.scrollHeight;
+    return typing;
+  }
+
+  /* Animación texto */
+  function escribirTexto(destino, texto) {
+    let i = 0;
+    return new Promise(resolve => {
+      const intervalo = setInterval(() => {
+        destino.innerHTML = texto.substring(0, i);
+        i++;
+        if (i > texto.length) {
+          clearInterval(intervalo);
+          resolve();
+        }
+      }, 15);
+    });
+  }
+
+  /* Mostrar respuesta */
+  async function mostrarRespuestaUnica(textoUsuario, textoBot) {
+
+    chatContent.innerHTML = "";
+    botonesChat.forEach(b => b.style.display = "none");
+
+    const userMsg = document.createElement("div");
+    userMsg.classList.add("chat-bubble", "bubble-user", "bubble-anim");
+    userMsg.innerHTML = "<b>Vos:</b> " + textoUsuario;
+    chatContent.appendChild(userMsg);
+
+    const typing = mostrarTyping();
+    await new Promise(r => setTimeout(r, 800));
+    typing.remove();
+
+    const contBot = document.createElement("div");
+    contBot.style.display = "flex";
+    contBot.style.margin = "10px 0";
+
+    const avatar = document.createElement("img");
+    avatar.src = "Foto chatbot.png";
+    avatar.style.width = "26px";
+    avatar.style.height = "26px";
+    avatar.style.borderRadius = "50%";
+    avatar.style.marginRight = "6px";
+    avatar.style.border = "2px solid #15cdd3";
+    avatar.style.objectFit = "cover";
+    avatar.style.background = "#fff";
+
+    const bubble = document.createElement("div");
+    bubble.classList.add("chat-bubble", "bubble-bot", "bubble-anim");
+
+    contBot.appendChild(avatar);
+    contBot.appendChild(bubble);
+    chatContent.appendChild(contBot);
+
+    await escribirTexto(bubble, textoBot);
+
+    const btnVolver = document.createElement("button");
+    btnVolver.id = "btnVolverMenu";
+    btnVolver.innerText = "⬅ Volver al menú";
+    btnVolver.onclick = volverMenu;
+    chatContent.appendChild(btnVolver);
+
+    chatContent.scrollTop = chatContent.scrollHeight;
+  }
+
+  botonesChat.forEach(btn => {
+    btn.onclick = function () {
+      const texto = this.innerText;
+      const clave = this.dataset.q;
+      mostrarRespuestaUnica(texto, respuestas[clave]);
+    };
+  });
+</script>
+
+</body>
+</html>

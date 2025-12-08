@@ -1,0 +1,1088 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1"/>
+<title>SGI – Módulo de Aprobadores (Agentes)</title>
+<link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet"/>
+<link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.css" rel="stylesheet"/>
+<!-- ZIP utils -->
+<script src="https://cdn.jsdelivr.net/npm/jszip@3.10.1/dist/jszip.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/file-saver@2.0.5/dist/FileSaver.min.js"></script>
+
+<style>
+  :root{
+    --pfa:#0e2a50; --pfa2:#1d4b97; --celeste:#4ba3ff;
+    --ok:#198754; --warn:#f59f00; --danger:#e03131; --soft:#f6f9ff; --muted:#6c757d;
+  }
+  html,body{ background:#f5f8ff; }
+  /* Encabezado institucional fijo */
+  header.sgi-header{
+    position:fixed; top:0; left:0; right:0; z-index:1050;
+    background:linear-gradient(90deg,var(--pfa),var(--pfa2),var(--celeste));
+    color:#fff; display:flex; align-items:center; justify-content:space-between; gap:1rem; flex-wrap:wrap;
+    padding:1rem 2rem; box-shadow:0 4px 10px rgba(0,0,0,.15);
+  }
+  .sgi-header .brand{ display:flex; align-items:center; gap:1rem; }
+  .sgi-header img{ width:60px; height:60px; object-fit:contain; }
+  .sgi-header h1{ font-size:1.6rem; margin:0; line-height:1.1; }
+  .sgi-header small{ font-size:.95rem; opacity:.9; }
+  body{ padding-top:100px; }
+
+  /* UI base (tu app) */
+  .small-muted{ font-size:.95rem; color:var(--muted); }
+  .main-grid{ display:grid; gap:16px; grid-template-columns: 0.9fr 1.3fr 0.8fr; }
+  @media (max-width:1200px){ .main-grid{ grid-template-columns: 1fr; } }
+  .card{ border:0; box-shadow:0 6px 18px rgba(10,30,60,.06); border-radius:16px; }
+  .card-header{ border-bottom:1px solid #eef2f6; }
+  .card-header.wrap{ display:flex; align-items:center; justify-content:space-between; gap:8px; flex-wrap:wrap; }
+  .btn,.form-control,.form-select,.input-group-text{ border-radius:12px; }
+  .btn{ min-width:0; }
+  .toolbar{ display:flex; flex-wrap:wrap; gap:8px; align-items:center; }
+  .toolbar .form-select{ min-width:200px; }
+  .toolbar .input-group{ flex-wrap:nowrap; isolation:isolate; margin-right:.5rem; min-width:260px; }
+  .toolbar .input-group > .form-control, .toolbar .input-group > .input-group-text, .toolbar .input-group > .btn{ height:40px; }
+  .list-scroll{ position:relative; height: min(64vh, calc(100vh - 340px)); overflow:auto; padding:12px; }
+  .aspirante{ display:flex; gap:12px; align-items:center; padding:12px; margin-bottom:10px; border-radius:14px; border:1px solid #e9eef6; background:#fff; cursor:pointer; transition:.15s transform ease, .15s box-shadow ease; min-height:90px; }
+  .aspirante:hover{ transform:translateY(-2px); box-shadow:0 8px 20px rgba(10,30,60,.08); }
+  .aspirante.active{ outline:2px solid #0d6efd33; }
+  .avatar{ width:44px; height:44px; border-radius:50%; background:#eaf2ff; display:flex; align-items:center; justify-content:center; font-weight:700; color:#0d6efd; border:1px solid #dbe7ff; }
+  .a-body{ flex:1 1 0; min-width:0; }
+  .a-name{ font-weight:700; line-height:1.1; }
+  .a-sub{ font-size:.9rem; color:var(--muted); }
+  .a-chips{ display:flex; gap:6px; flex-wrap:wrap; }
+  .badge-chip{ border-radius:20px; font-weight:600; }
+  .badge-amba{ background:#0d6efd; }
+  .badge-int{ background:#6f42c1; }
+  .badge-soft{ background:#eef4ff; color:#3656a7; border:1px solid #dbe6ff; }
+  .badge-zona{ background:#fff; color:#0d6efd; border:1px solid #cfe2ff; }
+  .f-header{ display:flex; align-items:center; gap:12px; flex-wrap:wrap; }
+  .f-title{ font-size:1.2rem; font-weight:800; }
+  .state-badge{ font-weight:800; border-radius:10px; }
+  .t-pills,.doc-actions,.chat-input,.f-header{ display:flex; flex-wrap:wrap; gap:8px; }
+  .chat-input textarea{ flex:1 1 0; min-height:42px; resize:vertical; }
+  .doc-thumb{ background:#f6f9ff; border:1px solid #e7eef7; border-radius:10px; height:88px; display:flex; align-items:center; justify-content:center; overflow:hidden; }
+  .doc-card{ border:1px solid #e7eef7; border-radius:14px; padding:10px; background:#fff; display:flex; flex-direction:column; gap:8px; }
+  .docs-grid{ display:grid; grid-template-columns:repeat(2, 1fr); gap:10px; }
+  @media (min-width:520px){ .docs-grid{ grid-template-columns:repeat(3, 1fr); } }
+  .timeline{ border-left:3px solid #e7eef7; padding-left:12px; margin-left:6px; }
+  .t-item{ position:relative; margin-bottom:12px; background:#fff; border:1px solid #e9eef6; border-radius:12px; padding:8px 12px; }
+  .t-item::before{ content:""; position:absolute; left:-14px; top:14px; width:10px; height:10px; background:#0d6efd; border-radius:50%; }
+  .t-label{ font-weight:700; }
+  .t-meta{ font-size:.8rem; color:var(--muted); }
+  #fChat .msg{ border:1px solid #e9eef6; border-radius:10px; padding:8px; margin-bottom:8px; background:#fff; word-break:break-word; overflow-wrap:anywhere; }
+  #fChat .msg.me{ background:#eef5ff; }
+  .btn-circle{width:28px;height:28px;padding:0;display:inline-flex;align-items:center;justify-content:center;border-radius:999px}
+  .btn-xxs{padding:.2rem .45rem;font-size:.8rem}
+  .seg-wrap{display:flex;flex-wrap:wrap;gap:8px;align-items:center}
+  .ck-legend .badge{ padding:.2rem .45rem; font-size:.75rem; }
+  .btn-status{width:28px;height:28px;border-radius:999px;border:1px solid #dee2e6;background:#fff;display:inline-flex;align-items:center;justify-content:center}
+  .btn-status.ok{background:#e8f7ee;border-color:#cfead8}
+  .btn-status.obs{background:#fff3cd;border-color:#ffe69c}
+  .btn-status.falta{background:#fde7ea;border-color:#f3c2ca}
+  .btn-status i{line-height:1}
+  .btn, .btn *{ writing-mode:initial !important; } .btn{ white-space:nowrap; }
+
+  /* Modal visor docs */
+  #mdlDoc .modal-dialog{ margin:0; }
+  #mdlDoc .modal-content{ height:100vh; display:flex; flex-direction:column; }
+  #mdlDoc .modal-body{ flex:1; padding:0; }
+  #docViewer{ width:100%; height:100%; background:#f8f9fb; }
+  #docViewer img,#docViewer iframe{ width:100%; height:100%; display:block; border:0; object-fit:contain; }
+
+  /* Mapa */
+  #mapWrap{ min-height:300px; }
+  #gmap{ width:100%; height:360px; border:0; border-radius:12px; }
+</style>
+</head>
+
+<body>
+  <!-- Encabezado fijo -->
+  <header class="sgi-header">
+    <div class="brand">
+      <img src="Captura de pantalla 2025-09-07 185933.png" alt="Escudo PFA">
+      <div>
+        <h1>SGI – Sistema de Gestión de Incorporaciones</h1>
+        <small>Módulo de Aprobadores (Agentes)</small>
+      </div>
+    </div>
+    <div class="small">Usuario: <strong>aprobadores.demo</strong></div>
+  </header>
+
+  <main class="container-fluid my-3 px-3">
+    <!-- Toolbar -->
+    <div class="card mb-3">
+      <div class="card-body toolbar">
+        <div class="input-group">
+          <span class="input-group-text"><i class="bi bi-search"></i></span>
+          <input id="q" class="form-control" placeholder="Buscar por DNI o nombre…">
+        </div>
+
+        <select id="filtroEstado" class="form-select">
+          <option value="ALL">Todos los estados</option>
+          <option value="APROBACION_PENDIENTE">Aprobadores</option>
+          <option value="CERRADO">CERRADO</option>
+          <option value="ARCHIVADO">ARCHIVADO</option>
+        </select>
+
+        <select id="filtroRegion" class="form-select">
+          <option value="ALL">Todas las regiones</option>
+          <option value="AMBA">AMBA</option>
+          <option value="INTERIOR">Interior</option>
+        </select>
+
+        <!-- Nuevo: filtro Zona AMBA -->
+        <select id="filtroZona" class="form-select" title="Zona AMBA" style="display:none;">
+          <option value="ALL">Todas las zonas</option>
+          <option value="NORTE">Zona Norte</option>
+          <option value="SUR">Zona Sur</option>
+          <option value="OESTE">Zona Oeste</option>
+        </select>
+
+        <select id="filtroProvincia" class="form-select">
+          <option value="ALL">Todas las provincias</option>
+        </select>
+
+        <button class="btn btn-outline-secondary" id="btnResetFiltros"><i class="bi bi-x-circle"></i> Limpiar</button>
+
+        <div class="ms-auto"></div>
+
+        <div class="input-group" style="max-width:640px;">
+          <span class="input-group-text">DNI</span>
+          <input id="dniImport" class="form-control" placeholder="Ej. 34567890" inputmode="numeric">
+          <button class="btn btn-primary" id="btnImportar"><i class="bi bi-person-down"></i> Importar</button>
+          <button class="btn btn-outline-primary" id="btnConsultar"><i class="bi bi-search"></i> Consultar</button>
+        </div>
+
+        <button class="btn btn-outline-secondary" id="btnSeed"><i class="bi bi-stars"></i> Demo</button>
+        <button class="btn btn-outline-danger" id="btnVaciar"><i class="bi bi-trash3"></i> Vaciar</button>
+        <button class="btn btn-outline-primary" id="btnExportAll"><i class="bi bi-download"></i> Exportar todo</button>
+      </div>
+    </div>
+
+    <div class="main-grid">
+      <!-- LISTA -->
+      <section class="card">
+        <div class="card-header wrap">
+          <strong>Agentes</strong>
+          <div class="small-muted d-flex align-items-center gap-2"><i class="bi bi-mouse2"></i> Doble clic para abrir</div>
+        </div>
+        <div class="list-scroll" id="lstAspirantes"></div>
+        <div class="d-flex justify-content-between align-items-center p-2 small" id="lstPager"></div>
+      </section>
+
+      <!-- FICHA -->
+      <section class="card">
+        <div class="card-header wrap">
+          <div class="d-flex align-items-center gap-2 f-header">
+            <div class="avatar" id="fAvatar">?</div>
+            <div>
+              <div class="f-title" id="fNombre">Seleccioná un agente</div>
+              <div class="small-muted">DNI/Exp.: <span id="fDni">—</span></div>
+            </div>
+          </div>
+          <div class="d-flex gap-2">
+            <button class="btn btn-success" id="btnAprobar"><i class="bi bi-check2-circle me-1"></i>Aprobar </button>
+            <button class="btn btn-outline-danger" id="btnRechazar"><i class="bi bi-x-octagon me-1"></i>Archivar</button>
+          </div>
+        </div>
+
+        <div class="card-body">
+          <div id="fEmpty" class="text-muted">Elegí un agente de la lista.</div>
+
+          <div id="ficha" hidden>
+            <div class="d-flex flex-wrap align-items-center gap-2 mb-2">
+              <span id="fEstado" class="badge state-badge text-bg-secondary">—</span>
+              <span id="fRegionChip" class="badge badge-chip badge-soft">—</span>
+              <span id="fZonaChip" class="badge badge-chip badge-zona" hidden>—</span>
+              <span id="fProvincia" class="badge badge-chip text-bg-secondary">—</span>
+              <span id="fMed" class="badge badge-chip text-bg-secondary"><i class="bi bi-heart-pulse me-1"></i>Estudios: —</span>
+              <span id="fPlazo" class="badge badge-chip text-bg-secondary">Plazo —</span>
+            </div>
+
+            <div class="row g-3">
+              <div class="col-lg-6">
+                <div class="card border-0">
+                  <div class="card-header bg-white"><strong>Datos del agente</strong></div>
+                  <div class="card-body small" id="fDatos">—</div>
+                </div>
+
+                <!-- ESTUDIOS MÉDICOS -->
+                <div class="card border-0 mt-2">
+                  <div class="card-header bg-white d-flex align-items-center gap-2">
+                    <strong>Estudios médicos</strong>
+                    <i class="bi bi-info-circle text-muted" data-bs-toggle="tooltip" title="Para elevar, los estudios deben estar en RECIBIDO."></i>
+                  </div>
+                  <div class="card-body small d-flex flex-wrap align-items-center gap-2">
+                    <span class="text-muted">Estado:</span> <span class="badge" id="fMedBadge">—</span>
+                    <span class="text-muted">Fecha:</span> <span id="fMedFecha">—</span>
+                    <div class="w-100"></div>
+                    <div class="seg-wrap med-actions">
+                      <div class="btn-group btn-group-sm" role="group" aria-label="Estado médicos">
+                        <button class="btn btn-outline-success btn-circle" data-med="RECIBIDO" title="Recibido"><i class="bi bi-check2"></i></button>
+                        <button class="btn btn-outline-warning btn-circle" data-med="OBS" title="Observado"><i class="bi bi-exclamation-lg"></i></button>
+                        <button class="btn btn-outline-secondary btn-circle" data-med="PENDIENTE" title="Pendiente"><i class="bi bi-arrow-repeat"></i></button>
+                      </div>
+                      <label class="btn btn-sm btn-outline-primary mb-0 ms-auto" id="btnAdjMed" title="Adjuntar estudios (local)">
+                        <i class="bi bi-upload"></i> <span>Adjuntar</span>
+                        <input type="file" multiple hidden accept="image/*,.pdf">
+                      </label>
+                    </div>
+                  </div>
+                </div>
+
+                <!-- CHECKLIST -->
+                <div class="card border-0 mt-2">
+                  <div class="card-header bg-white d-flex justify-content-between align-items-center">
+                    <strong>Checklist de documentación</strong>
+                    <div class="small-muted">Clic: FALTA → OBS → OK</div>
+                  </div>
+                  <ul class="list-group list-group-flush" id="fChecklist"></ul>
+                  <div class="d-flex gap-2 px-3 py-2 ck-legend">
+                    <span class="badge text-bg-success">✔ OK</span>
+                    <span class="badge text-bg-warning">⚠ Obs</span>
+                    <span class="badge text-bg-danger">✖ Falta</span>
+                    <button class="btn btn-sm btn-outline-primary ms-auto" id="btnReclamar" title="Notificar faltantes">
+                      <i class="bi bi-megaphone"></i>
+                    </button>
+                  </div>
+                </div>
+
+                <!-- DOCUMENTOS -->
+                <div class="card border-0 mt-2">
+                  <div class="card-header bg-white d-flex justify-content-between w-100">
+                    <strong>Documentación presentada</strong>
+                    <div class="doc-actions">
+                      <button class="btn btn-sm btn-outline-secondary" id="btnDocsRef" title="Refrescar">
+                        <i class="bi bi-arrow-repeat"></i> <span>Refrescar</span>
+                      </button>
+                      <button class="btn btn-sm btn-outline-primary" id="btnDocsZip" title="Descargar todo (ZIP)">
+                        <i class="bi bi-archive"></i> <span>ZIP</span>
+                      </button>
+                      <button class="btn btn-sm btn-outline-success" id="btnDocsSave" title="Guardar estados">
+                        <i class="bi bi-save2"></i> <span>Guardar</span>
+                      </button>
+                      <label class="btn btn-sm btn-outline-primary mb-0" id="btnDocsUpload" title="Cargar (local)">
+                        <i class="bi bi-upload"></i> <span>Cargar (local)</span>
+                        <input type="file" multiple hidden accept="image/*,.pdf">
+                      </label>
+                    </div>
+                  </div>
+                  <div class="docs-grid" id="fDocs"></div>
+                </div>
+              </div>
+
+              <!-- MENSAJES + MAPA -->
+              <div class="col-lg-6">
+                <div class="card border-0">
+                  <div class="card-header bg-white"><strong>Mensajes</strong></div>
+                  <div class="card-body">
+                    <div class="chat-box" id="fChat"></div>
+                    <div class="chat-input">
+                      <textarea class="form-control" id="msgText" placeholder="Escribí un mensaje para el agente…"></textarea>
+                      <button class="btn btn-primary" id="btnMsgSend"><i class="bi bi-send"></i></button>
+                    </div>
+                    <div class="d-flex gap-0.2 mt-0.2">
+                      <button class="btn btn-sm btn-outline-secondary" id="btnMsgSync"><i class="bi bi-arrow-repeat"></i> Sincronizar</button>
+                      <button class="btn btn-sm btn-outline-primary" id="btnExpOne"><i class="bi bi-download"></i> Exportar</button>
+                      <button class="btn btn-sm btn-outline-secondary" id="btnMarkAll"><i class="bi bi-eye"></i> Marcar visto</button>
+                    </div>
+                  </div>
+                </div>
+
+                <div class="card border-0 mt-2" id="mapWrap">
+                  <div class="card-header bg-white d-flex align-items-center justify-content-between">
+                    <strong>Ubicación del domicilio</strong>
+                    <a id="btnAbrirMaps" class="btn btn-sm btn-outline-primary" href="#" target="_blank" rel="noopener">
+                      <i class="bi bi-geo-alt"></i> Abrir en Maps
+                    </a>
+                  </div>
+                  <div class="card-body">
+                    <iframe id="gmap" loading="lazy" allowfullscreen
+                      src="https://www.google.com/maps/embed/v1/place?key=TU_API_KEY&q=Argentina&zoom=4"></iframe>
+                  </div>
+                </div>
+              </div>
+            </div><!-- row -->
+          </div>
+        </div>
+      </section>
+
+      <!-- TIMELINE -->
+      <section class="card">
+        <div class="card-header wrap">
+          <strong>Movimientos del expediente</strong>
+          <div class="t-pills">
+            <button class="btn btn-sm btn-outline-secondary" data-tf="ALL">Todos</button>
+            <button class="btn btn-sm btn-outline-secondary" data-tf="estado">Estados</button>
+            <button class="btn btn-sm btn-outline-secondary" data-tf="checklist">Checklist</button>
+            <button class="btn btn-sm btn-outline-secondary" data-tf="med">Médicos</button>
+            <button class="btn btn-sm btn-outline-secondary" data-tf="doc">Docs</button>
+            <button class="btn btn-sm btn-outline-secondary" data-tf="mensaje">Mensajes</button>
+            <button class="btn btn-sm btn-outline-secondary" data-tf="recordatorio">Record</button>
+            <button class="btn btn-sm btn-outline-secondary" data-tf="region">Región</button>
+            <button class="btn btn-sm btn-outline-primary" id="btnExpMovs"><i class="bi bi-download"></i></button>
+          </div>
+        </div>
+        <div class="card-body">
+          <div id="tEmpty" class="text-muted">Sin selección.</div>
+          <div id="timeline" class="timeline" hidden></div>
+        </div>
+      </section>
+    </div>
+  </main>
+
+  <!-- MODAL DOCS -->
+  <div class="modal fade" id="mdlDoc" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-fullscreen">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h6 class="modal-title"><i class="bi bi-file-earmark-text me-2"></i><span id="docTitle">Documento</span></h6>
+          <button class="btn btn-sm btn-outline-secondary me-2" id="docDownload" title="Descargar">
+            <i class="bi bi-download"></i>
+          </button>
+          <button class="btn-close" data-bs-dismiss="modal" aria-label="Cerrar"></button>
+        </div>
+        <div class="modal-body"><div id="docViewer"></div></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Toasts -->
+  <div class="position-fixed bottom-0 end-0 p-3" style="z-index:1080">
+    <div id="toastContainer"></div>
+  </div>
+
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+
+  <!-- ===== Stub de API demo ===== -->
+  <script>
+    window.PFA_API = window.PFA_API || {};
+    let SERVER_DOCS = {};
+    window.PFA_API.listDocs = async (dni)=> SERVER_DOCS[dni] || [];
+  </script>
+
+  <!-- ===== APP ===== -->
+  <script>
+  (()=>{
+    /* ===== Catálogos ===== */
+    const PROVINCIAS = [ 'Buenos Aires','CABA','Catamarca','Chaco','Chubut','Córdoba','Corrientes','Entre Ríos','Formosa','Jujuy','La Pampa','La Rioja','Mendoza','Misiones','Neuquén','Río Negro','Salta','San Juan','San Luis','Santa Cruz','Santa Fe','Santiago del Estero','Tierra del Fuego','Tucumán' ];
+    const STORAGE_KEY='pfa_aprobadores_items';
+    const APPROVALS_KEY='pfa_aprobaciones';
+    const MESSAGES_KEY='pfa_mensajes';
+    const DOCS_KEY='pfa_docs_local';
+    const MOVS_KEY='pfa_movs';
+    const DEADLINE_DAYS=30;
+    const REMINDER_DAYS=[7,14,21,28,30];
+    const REQUIRED_DOCS=[ 'DNI (frente y dorso)','Partida de nacimiento','Certificado de antecedentes','Estudios/Analítico','Domicilio actualizado','Foto 4x4','Declaración jurada firmada','Estudios médicos' ];
+    const ZONAS_AMBA = { NORTE:['Vicente López','San Isidro','San Fernando','Tigre','San Martín','Malvinas Argentinas','Pilar','Escobar'], SUR:['Quilmes','Berazategui','Florencio Varela','Avellaneda','Lanús','Lomas de Zamora','Almirante Brown','Esteban Echeverría','Ezeiza'], OESTE:['Morón','Ituzaingó','Hurlingham','La Matanza','Merlo','Moreno','Tres de Febrero'] };
+
+    /* ===== Helpers ===== */
+    const $=s=>document.querySelector(s);
+    let DATA=JSON.parse(localStorage.getItem(STORAGE_KEY)||'[]');
+    const loadApprovals=()=>JSON.parse(localStorage.getItem(APPROVALS_KEY)||'{}');
+    const saveApprovals=m=>localStorage.setItem(APPROVALS_KEY,JSON.stringify(m));
+    const loadMsgs=()=>JSON.parse(localStorage.getItem(MESSAGES_KEY)||'{}');
+    const saveMsgs=m=>localStorage.setItem(MESSAGES_KEY,JSON.stringify(m));
+    const loadDocs=()=>JSON.parse(localStorage.getItem(DOCS_KEY)||'{}');
+    const saveDocs=m=>localStorage.setItem(DOCS_KEY,JSON.stringify(m));
+    const loadMovs=()=>JSON.parse(localStorage.getItem(MOVS_KEY)||'{}');
+    const saveMovs=m=>localStorage.setItem(MOVS_KEY,JSON.stringify(m));
+    function save(){ localStorage.setItem(STORAGE_KEY, JSON.stringify(DATA)); }
+    function expedienteFromDNI(d){ return String(d); }
+    function fmtDate(d){ return new Date(d).toLocaleDateString(); }
+    function fmtDateTime(d){ return new Date(d).toLocaleString(); }
+    function addDays(d,n){ const x=new Date(d); x.setDate(x.getDate()+n); return x; }
+    function escapeHTML(s){ return String(s||'').replace(/[&<>\"']/g,m=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[m])); }
+    function initials(n){ const p=(n||'').split(/,\s*|\s+/).filter(Boolean); return (p[0]?.[0]||'A')+(p[1]?.[0]||''); }
+    function showToast(title,body){
+      const id='t_'+Date.now();
+      document.getElementById('toastContainer').insertAdjacentHTML('beforeend',
+        `<div class="toast show" id="${id}"><div class="toast-header"><strong class="me-auto">${escapeHTML(title)}</strong>
+        <small>${new Date().toLocaleTimeString()}</small><button type="button" class="btn-close ms-2 mb-1" data-bs-dismiss="toast"></button></div>
+        <div class="toast-body">${escapeHTML(body)}</div></div>`);
+      setTimeout(()=>document.getElementById(id)?.remove(),6000);
+    }
+    async function notifyAspirante(dni,title,body,preview){ try{ if(window.PFA_API?.createNotification){ await PFA_API.createNotification({dni,title,body,preview}); } }catch(_){} }
+    function ensurePlazoStart(it){ if(it.estado==='APROBACION_PENDIENTE' && !it.plazoDesde){ it.plazoDesde=new Date().toISOString(); if(typeof it.autoReminders==='undefined') it.autoReminders=true; save(); } }
+    function daysLeft(it){ if(!it.plazoDesde) return null; const dias=it.plazoDias||DEADLINE_DAYS; return Math.floor((addDays(it.plazoDesde,dias)-new Date())/86400000); }
+    function logMove(dni,tipo,label,detail='',who='Sistema'){ const movs=loadMovs(); const arr=movs[dni]||[]; arr.push({ts:new Date().toISOString(),tipo,label,detail,who}); movs[dni]=arr; saveMovs(movs); }
+    function inferMimeByName(n=''){ const s=String(n).toLowerCase();
+      if(s.endsWith('.pdf')) return 'application/pdf';
+      const m=s.match(/\.(png|jpe?g|webp|gif|bmp|tiff?)$/);
+      return m?`image/${m[1].replace('jpg','jpeg').replace('tif','tiff')}`:'application/octet-stream';
+    }
+    function normalizeDocs(resp){
+      const arr=Array.isArray(resp)?resp:(Array.isArray(resp?.items)?resp.items:[]);
+      return arr.map(d=>({ id:d.id||d.key||`${Math.random()}`, name:d.title||d.name||d.filename||'Documento',
+        url:d.url||d.fileUrl||d.link||d.href||d.signedUrl||'', mime:d.mime||d.mimetype||d.contentType||inferMimeByName(d.name||d.title),
+        uploadedAt:d.uploadedAt||d.createdAt||d.createTime||d.ts||new Date().toISOString() })).filter(x=>x.url);
+    }
+    const isImg=m=>/^image\//i.test(m||''); const isPDF=(m,n='')=>/pdf$/i.test(m||'')||/\.pdf$/i.test(n||'');
+
+    /* Docs API + Local */
+    function dedupeDocs(arr){ const seen=new Set(); const out=[]; for(const d of arr){ const key=[d.id||'', d.url||'', d.name||''].join('|'); if(!seen.has(key)){ seen.add(key); out.push(d);} } return out; }
+    async function listDocs(dni){
+      let apiDocs=[]; let localDocs=[];
+      if(window.PFA_API?.listDocs){ try{ apiDocs = normalizeDocs(await PFA_API.listDocs(dni)); }catch(e){ apiDocs=[]; } }
+      try{ localDocs = (loadDocs()[dni]||[]);}catch(_){ localDocs=[]; }
+      return dedupeDocs([...(apiDocs||[]), ...(localDocs||[])]);
+    }
+    async function saveLocalDocs(dni, files){
+      const store=loadDocs(); const list=store[dni]||[];
+      for (const f of files){
+        const dataURL = await new Promise(res=>{ const fr=new FileReader(); fr.onload=()=>res(fr.result); fr.readAsDataURL(f); });
+        list.push({ id: Date.now()+Math.random(), name: f.name, mime: f.type||inferMimeByName(f.name), dataURL, uploadedAt: new Date().toISOString(), url:dataURL });
+        logMove(dni,'doc','Documento cargado', f.name, 'Aprobador');
+      }
+      store[dni]=list; saveDocs(store);
+    }
+
+    /* Estados docs */
+    function stClass(st){ return st==='OK'?'ok':st==='OBS'?'obs':'falta'; }
+    function stIcon(st){ return st==='OK'?'<i class="bi bi-check2"></i>':st==='OBS'?'<i class="bi bi-exclamation-lg"></i>':'<i class="bi bi-x-lg"></i>'; }
+    function stNext(st){ return st==='OK'?'OBS':st==='OBS'?'FALTA':'OK'; }
+
+    /* ===== Lista + Filtros ===== */
+    const lst=$('#lstAspirantes'); let FILTERED=[]; let PAGE=1; const PAGE_SIZE=50;
+    function estadoBadgeTxt(e){ return ({APROBACION_PENDIENTE:'Aprobadores',ELEVADO:'Elevado',RECHAZADO:'Rechazado'})[e]||e; }
+    function medStateFor(dni){ const ap=loadApprovals()[dni]||{}; return ap.med?.estado||'PENDIENTE'; }
+
+    function applyFilters(){
+      const q=($('#q').value||'').trim().toLowerCase();
+      const fE=$('#filtroEstado').value;
+      const fR=$('#filtroRegion').value;
+      const fP=$('#filtroProvincia').value;
+      const fZ=$('#filtroZona').value;
+      const out=[];
+      for(const it of DATA){
+        if(fE!=='ALL'&&it.estado!==fE) continue;
+        if(fR!=='ALL'&&it.region!==fR) continue;
+        if(fR==='AMBA' && fZ!=='ALL'){
+          if((it.zonaAMBA||'').toUpperCase()!==fZ) continue;
+        }
+        if(fP!=='ALL'){
+          if(fP==='CABA'){ if(it.region!=='AMBA') continue; }
+          else { if(it.region!=='INTERIOR'||(it.provincia||'')!==fP) continue; }
+        }
+        if(q && !(String(it.dni).includes(q) || (it.nombre||'').toLowerCase().includes(q))) continue;
+        ensurePlazoStart(it);
+        out.push(it);
+      }
+      FILTERED=out; PAGE=1;
+    }
+
+    function cardHTML(it){
+      const left=daysLeft(it);
+      const plTxt=it.estado==='APROBACION_PENDIENTE' ? (left==null?'—': left>10?`${left} d`: left>0?`${left} d`: left===0?'hoy':`- ${Math.abs(left)} d`) : '—';
+      const med=medStateFor(it.dni);
+      const zona = (it.region==='AMBA' && it.zonaAMBA) ? `<span class="badge badge-chip badge-zona">AMBA ${it.zonaAMBA[0]+it.zonaAMBA.slice(1).toLowerCase()}</span>` : '';
+      return `
+      <div class="aspirante" data-dni="${it.dni}">
+        <div class="avatar">${escapeHTML((initials(it.nombre)||'AG'))}</div>
+        <div class="a-body">
+          <div class="a-name">${escapeHTML(it.nombre||'—')}</div>
+          <div class="a-sub">DNI/Exp.: <span class="text-monospace">${it.dni}</span></div>
+          <div class="a-chips mt-1">
+            <span class="badge badge-chip ${it.region==='INTERIOR'?'badge-int':'badge-amba'}">${it.region==='INTERIOR'?'Interior':'AMBA'}</span>
+            ${zona}
+            <span class="badge badge-chip text-bg-secondary">${escapeHTML(it.provincia|| (it.region==='AMBA'?'CABA':'—'))}</span>
+            <span class="badge badge-chip ${it.estado==='ELEVADO'?'text-bg-success': it.estado==='RECHAZADO'?'text-bg-danger':'text-bg-dark'}">${estadoBadgeTxt(it.estado)}</span>
+            <span class="badge badge-chip ${med==='RECIBIDO'?'text-bg-success': med==='OBS'?'text-bg-warning':'text-bg-secondary'}"><i class="bi bi-heart-pulse me-1"></i>${med}</span>
+            <span class="badge badge-chip ${ (left!=null && (left<=0)) ? 'text-bg-danger' : 'text-bg-primary'}">Plazo ${plTxt}</span>
+          </div>
+        </div>
+      </div>`;
+    }
+
+    function updatePager(total,tp){
+      const p=$('#lstPager');
+      p.innerHTML=`
+        <div>${total} resultado${total!==1?'s':''} • Página ${tp?PAGE:0}/${tp||0}</div>
+        <div class="btn-group btn-group-sm">
+          <button class="btn btn-outline-secondary" id="pgPrev" ${PAGE<=1?'disabled':''}><i class="bi bi-chevron-left"></i></button>
+          <button class="btn btn-outline-secondary" id="pgNext" ${PAGE>=tp?'disabled':''}><i class="bi bi-chevron-right"></i></button>
+        </div>`;
+      p.querySelector('#pgPrev')?.addEventListener('click',()=>{ if(PAGE>1){ PAGE--; renderListPage(); } });
+      p.querySelector('#pgNext')?.addEventListener('click',()=>{ const totPages=Math.max(1,Math.ceil(total/PAGE_SIZE)); if(PAGE<totPages){ PAGE++; renderListPage(); } });
+    }
+
+    function renderListPage(){
+      const total=FILTERED.length, tp=Math.max(1,Math.ceil(total/PAGE_SIZE));
+      PAGE=Math.max(1,Math.min(PAGE,tp));
+      const s=(PAGE-1)*PAGE_SIZE, e=Math.min(total,s+PAGE_SIZE);
+      lst.innerHTML = total ? FILTERED.slice(s,e).map(cardHTML).join('') : `<div class="text-center text-muted py-4">Sin resultados.</div>`;
+      lst.querySelectorAll('.aspirante').forEach(card=>{
+        card.addEventListener('click',()=>{
+          lst.querySelectorAll('.aspirante.active').forEach(a=>a.classList.remove('active'));
+          card.classList.add('active');
+        });
+        card.addEventListener('dblclick',()=> selectDNI(card.dataset.dni));
+      });
+      updatePager(total,tp);
+    }
+    function renderLista(){ applyFilters(); renderListPage(); }
+    function gotoDNI(dni){
+      const idx=FILTERED.findIndex(x=>String(x.dni)===String(dni));
+      if(idx<0) return false;
+      PAGE=Math.floor(idx/PAGE_SIZE)+1; renderListPage();
+      const c=lst.querySelector(`.aspirante[data-dni="${dni}"]`);
+      if(c){ c.classList.add('active'); c.scrollIntoView({behavior:'smooth',block:'center'});} return true;
+    }
+
+    /* ===== Ficha / Timeline ===== */
+    let CURRENT_DNI=null, TL_FILTER='ALL';
+    function setFichaEmpty(){ $('#fEmpty').hidden=false; $('#ficha').hidden=true; $('#timeline').hidden=true; $('#tEmpty').hidden=false; CURRENT_DNI=null; }
+    function initTooltips(){ document.querySelectorAll('[data-bs-toggle="tooltip"]').forEach(el=>{ if(!bootstrap.Tooltip.getInstance(el)) new bootstrap.Tooltip(el); }); }
+
+    function setFicha(it){
+      $('#fEmpty').hidden=true; $('#ficha').hidden=false; $('#timeline').hidden=false; $('#tEmpty').hidden=true;
+      $('#fNombre').textContent=it.nombre||'—';
+      $('#fDni').textContent=it.dni;
+      $('#fAvatar').textContent=initials(it.nombre||'A');
+      $('#fEstado').className='badge state-badge '+(it.estado==='ELEVADO'?'text-bg-success':it.estado==='RECHAZADO'?'text-bg-danger':'text-bg-dark');
+      $('#fEstado').textContent=estadoBadgeTxt(it.estado);
+      $('#fRegionChip').className='badge badge-chip '+(it.region==='INTERIOR'?'badge-int':'badge-amba');
+      $('#fRegionChip').textContent=it.region==='INTERIOR'?'Interior':'AMBA';
+      if(it.region==='AMBA' && it.zonaAMBA){
+        $('#fZonaChip').hidden=false;
+        $('#fZonaChip').textContent='AMBA '+it.zonaAMBA[0]+it.zonaAMBA.slice(1).toLowerCase();
+      } else { $('#fZonaChip').hidden=true; }
+      $('#fProvincia').textContent=it.provincia || (it.region==='AMBA'?'CABA':'—');
+      const left=daysLeft(it);
+      $('#fPlazo').className='badge badge-chip '+(left!=null && left<=0?'text-bg-danger':'text-bg-primary');
+      $('#fPlazo').textContent='Plazo '+(it.estado==='APROBACION_PENDIENTE' ? (left==null?'—': left>10?`${left} días`: left>0?`${left} días`: left===0?'vence hoy':`vencido ${Math.abs(left)} d`) : '—');
+
+      const ap=loadApprovals()[it.dni]||{};
+      const med=ap.med?.estado||'PENDIENTE';
+      $('#fMed').className='badge badge-chip '+(med==='RECIBIDO'?'text-bg-success':med==='OBS'?'text-bg-warning':'text-bg-secondary');
+      $('#fMed').innerHTML=`<i class="bi bi-heart-pulse me-1"></i>Estudios: ${med}`;
+      $('#fMedBadge').className='badge '+(med==='RECIBIDO'?'text-bg-success':med==='OBS'?'text-bg-warning':'text-bg-secondary');
+      $('#fMedBadge').textContent=med;
+      $('#fMedFecha').textContent=ap.med?.fecha?fmtDate(ap.med.fecha):'—';
+
+      (async()=>{
+        let pre=null; try{ pre=await PFA_API.getPreinscripcion?.(it.dni);}catch(_){}
+        const da=pre?.domAct||{};
+        const fmt=d=>[d.calle,d.piso?('Piso '+d.piso):'',d.cp,d.loc,d.prov||d.provincia,d.pais].filter(Boolean).join(', ');
+        $('#fDatos').innerHTML=
+          `<div><span class="text-muted">Cargo:</span> ${escapeHTML(pre?.cargo||'Agente')}</div>
+           <div><span class="text-muted">Nacimiento:</span> ${escapeHTML(pre?.nacimiento||'—')}</div>
+           <div><span class="text-muted">E-mail:</span> ${escapeHTML(pre?.email||'—')}</div>
+           <div class="mt-2"><span class="text-muted">Domicilio:</span> <span id="addrText">${escapeHTML(fmt(da)||'—')}</span></div>
+           <div class="mt-2"><span class="text-muted">Otra fuerza:</span> ${pre?.otraFuerza==='si' ? `Sí (${escapeHTML(pre?.otraFuerzaDetalle||'sin detalle')})` : (pre ? 'No' : '—')}</div>`;
+        // Actualizar mapa si hay domicilio
+        updateMapFromAddress(it, fmt(da)||'');
+      })();
+
+      renderChecklist(it.dni);
+      renderDocs(it.dni);
+      renderChat(it.dni);
+      renderTimeline(it.dni);
+      updateApproveButton(it.dni);
+      initTooltips();
+    }
+
+    function updateMapFromAddress(it, addr){
+      const frame = document.getElementById('gmap');
+      const openBtn = document.getElementById('btnAbrirMaps');
+      const base = 'https://www.google.com/maps';
+      if(addr && addr.trim()){
+        const q = encodeURIComponent(addr + ', Argentina');
+        frame.src = `https://www.google.com/maps/embed/v1/place?key=TU_API_KEY&q=${q}&zoom=14`;
+        openBtn.href = `${base}/search/?api=1&query=${q}`;
+      } else {
+        frame.src = `https://www.google.com/maps/embed/v1/place?key=TU_API_KEY&q=Argentina&zoom=4`;
+        openBtn.href = `${base}`;
+      }
+    }
+
+    function canElevate(dni){
+      const a=loadApprovals()[dni]||{};
+      if(a.med?.estado!=='RECIBIDO') return {ok:false,reason:'Estudios médicos no están en RECIBIDO.'};
+      const docs=a.docs||{};
+      if(Object.values(docs).some(v=>v==='FALTA')) return {ok:false,reason:'Hay documentación en FALTA.'};
+      return {ok:true};
+    }
+    function updateApproveButton(dni){
+      const btn=$('#btnAprobar'); const chk=canElevate(dni);
+      if(chk.ok){ btn.removeAttribute('disabled'); btn.title=''; } else { btn.setAttribute('disabled',''); btn.title=chk.reason; }
+    }
+
+    /* ===== Checklist ===== */
+    function renderChecklist(dni){
+      const approvals=loadApprovals();
+      const state=approvals[dni]||{docs:{}};
+      const ul=$('#fChecklist'); ul.innerHTML='';
+      REQUIRED_DOCS.forEach(doc=>{
+        const st=state.docs?.[doc]||'FALTA';
+        const badge=st==='OK'?'text-bg-success':st==='OBS'?'text-bg-warning':'text-bg-danger';
+        const li=document.createElement('li');
+        li.className='list-group-item d-flex justify-content-between align-items-center';
+        li.innerHTML=`<span>${doc}</span><span class="badge ${badge}">${st}</span>`;
+        li.addEventListener('click',()=>{
+          const cur=li.querySelector('.badge').textContent;
+          const nxt=cur==='FALTA'?'OBS':cur==='OBS'?'OK':'FALTA';
+          const docs=(approvals[dni]?.docs)||{};
+          docs[doc]=nxt;
+          approvals[dni]={...(approvals[dni]||{}),docs};
+          saveApprovals(approvals);
+          logMove(dni,'checklist',`${doc} → ${nxt}`,'','Aprobador');
+          setFicha(DATA.find(x=>x.dni===dni));
+          updateApproveButton(dni);
+        });
+        ul.appendChild(li);
+      });
+
+      $('#btnReclamar').onclick=()=>{
+        const docs=(loadApprovals()[dni]?.docs)||{};
+        const falt=Object.entries(docs).filter(([,s])=>s==='FALTA').map(([k])=>k);
+        const prev=falt.length?`Te falta: ${falt.slice(0,3).join(', ')}${falt.length>3?'…':''}`:'Seguimiento de documentación.';
+        notifyAspirante(dni,'Recordatorio de documentación','Por favor, presentá la documentación pendiente.',prev);
+        showToast('Reclamo enviado',`Se notificó al DNI ${dni}.`);
+        logMove(dni,'recordatorio','Reclamo manual de documentación', prev, 'Aprobador');
+      };
+    }
+
+    /* ===== Documentos ===== */
+    async function renderDocs(dni){
+      const grid=$('#fDocs'); const docs=await listDocs(dni);
+      if(!docs.length){ grid.innerHTML=`<div class="text-muted small px-3 py-2">Sin documentación cargada.</div>`; return; }
+      const approvals=loadApprovals(); const map=approvals[dni]?.docs||{};
+      grid.innerHTML=docs.map(d=>{
+        const url=d.url; const name=d.name||'Documento'; const mime=d.mime||inferMimeByName(name);
+        const st=map[name] || (/estudio/i.test(name)?(map['Estudios médicos']||'FALTA'):(map[name]||'FALTA'));
+        const thumb= /^image\//i.test(mime) ? `<img src="${url}" style="max-width:100%;max-height:100%">`
+                     : ( /pdf$/i.test(mime)||/\.pdf$/i.test(name) ? `<i class="bi bi-filetype-pdf fs-2"></i>` : `<i class="bi bi-file-earmark fs-2"></i>` );
+        return `<div class="doc-card" data-id="${d.id}" data-name="${escapeHTML(name)}" data-mime="${mime}" data-url="${url}">
+          <div class="doc-thumb">${thumb}</div>
+          <div class="doc-name" title="${escapeHTML(name)}">${escapeHTML(name)}</div>
+          <div class="doc-meta">${new Date(d.uploadedAt||Date.now()).toLocaleString()}</div>
+          <div class="doc-actions">
+            <button class="btn btn-light border btn-xxs" data-view title="Ver"><i class="bi bi-eye"></i></button>
+            <a class="btn btn-light border btn-xxs" href="${url}" download title="Descargar"><i class="bi bi-download"></i></a>
+            <button class="btn btn-status ${stClass(st)}" data-cycle data-st="${st}" title="Estado: ${st}">${stIcon(st)}</button>
+          </div>
+        </div>`;
+      }).join('');
+
+      grid.querySelectorAll('[data-view]').forEach(btn=>{
+        btn.addEventListener('click',e=>{
+          const el=e.target.closest('.doc-card');
+          openDocViewer({name:el.dataset.name,mime:el.dataset.mime,url:el.dataset.url});
+        });
+      });
+
+      grid.querySelectorAll('[data-cycle]').forEach(btn=>{
+        btn.addEventListener('click',()=>{
+          const card=btn.closest('.doc-card'); const name=card.dataset.name;
+          const cur=btn.getAttribute('data-st')||'FALTA'; const nxt=stNext(cur);
+          const approvals=loadApprovals(); const curAp=approvals[dni]||{}; const docs=curAp.docs||{};
+          docs[name]=nxt;
+          if(/estudio/i.test(name)||name==='Estudios médicos'){
+            curAp.med={...(curAp.med||{})};
+            if(nxt==='OK'){ curAp.med.estado='RECIBIDO'; curAp.med.fecha=curAp.med.fecha||new Date().toISOString(); }
+            if(nxt==='OBS'){curAp.med.estado='OBS';}
+            if(nxt==='FALTA'){curAp.med.estado='PENDIENTE'; curAp.med.fecha=null;}
+            logMove(dni,'med',`Estudios médicos → ${curAp.med.estado}`,'Marcado desde documentos','Aprobador');
+          } else {
+            logMove(dni,'doc',`${name} → ${nxt}`,'','Aprobador');
+          }
+          approvals[dni]={...curAp,docs}; saveApprovals(approvals);
+          btn.setAttribute('data-st',nxt);
+          btn.className='btn btn-status '+stClass(nxt);
+          btn.innerHTML=stIcon(nxt);
+          btn.title='Estado: '+nxt;
+          // refresca badges
+          setFicha(DATA.find(x=>x.dni===dni));
+        });
+      });
+
+      // Adjuntar local
+      const up = $('#btnDocsUpload input');
+      if (up) up.onchange = async ()=>{
+        if (!up.files?.length) return;
+        await saveLocalDocs(dni, up.files);
+        up.value=''; await renderDocs(dni);
+        showToast('Cargado (local)','Archivos agregados.');
+      };
+      // Adjuntar estudios: marca RECIBIDO
+      const medUp = $('#btnAdjMed input');
+      if (medUp) medUp.onchange = async ()=>{
+        if (!medUp.files?.length) return;
+        await saveLocalDocs(dni, medUp.files);
+        medUp.value='';
+        const approvals=loadApprovals(); const cur=approvals[dni]||{};
+        cur.med = { estado:'RECIBIDO', fecha:new Date().toISOString() };
+        approvals[dni]=cur; saveApprovals(approvals);
+        logMove(dni,'med','Estudios médicos → RECIBIDO','Archivo cargado','Aprobador');
+        await renderDocs(dni);
+        setFicha(DATA.find(x=>x.dni===dni));
+        showToast('Estudios','Estudios médicos cargados y marcados RECIBIDO.');
+      };
+
+      $('#btnDocsRef').onclick=()=>renderDocs(dni);
+      $('#btnDocsZip').onclick=()=>zipDocs(dni, docs);
+      $('#btnDocsSave').onclick=()=>saveDocStates(dni);
+    }
+
+    async function zipDocs(dni, docs){
+      if(!docs?.length){ showToast('ZIP','No hay documentos.'); return; }
+      const zip = new JSZip(); let readme=[];
+      for(const d of docs){
+        try{
+          const res = await fetch(d.url);
+          if(!res.ok) throw new Error('HTTP '+res.status);
+          const blob = await res.blob();
+          const ext = (d.name||'').split('.').pop()||'dat';
+          zip.file(d.name||`doc_${d.id}.${ext}`, blob);
+        }catch(e){
+          readme.push(`No se pudo descargar: ${d.name} (${d.url})`);
+        }
+      }
+      if(readme.length) zip.file('LEEME.txt', 'Archivos no incluidos por restricciones del navegador/CORS:\n\n'+readme.join('\n'));
+      const content = await zip.generateAsync({type:'blob'});
+      saveAs(content, `documentacion_${dni}.zip`);
+      showToast('ZIP','Descarga preparada.');
+    }
+
+    async function saveDocStates(dni){
+      const approvals=loadApprovals();
+      // ya está persistido en localStorage; además intentamos “servidor”
+      try{
+        if(window.PFA_API?.saveApprovals){
+          await PFA_API.saveApprovals(dni, approvals[dni]||{});
+          showToast('Guardado','Estados sincronizados en servidor.');
+        } else {
+          showToast('Guardado','Estados guardados localmente.');
+        }
+      }catch(e){
+        showToast('Aviso','Guardado local OK. Error de servidor.');
+      }
+      logMove(dni,'doc','Estados de documentación guardados','','Aprobador');
+    }
+
+    function openDocViewer(doc){
+      const m=new bootstrap.Modal('#mdlDoc');
+      $('#docTitle').textContent=doc.name||'Documento';
+      const viewer=$('#docViewer'); viewer.innerHTML='';
+      const url=doc.url||'#';
+      $('#docDownload').onclick=()=>window.open(url,'_blank');
+      if(isImg(doc.mime,doc.name)) viewer.innerHTML=`<img src="${url}" alt="${(doc.name||'Documento').replace(/"/g,'&quot;')}">`;
+      else if(isPDF(doc.mime,doc.name)) viewer.innerHTML=`<iframe src="${url}"></iframe>`;
+      else viewer.innerHTML=`<div class="d-flex flex-column justify-content-center align-items-center h-100 text-center p-4"><i class="bi bi-file-earmark fs-1 mb-2"></i><div class="mb-3">Este tipo de archivo no se puede previsualizar.</div><a class="btn btn-primary" href="${url}" target="_blank"><i class="bi bi-box-arrow-up-right me-1"></i> Abrir en nueva pestaña</a></div>`;
+      m.show();
+    }
+
+    /* ===== Chat ===== */
+    function pushMsgNoLimit(dni, msg){
+      const map = loadMsgs(); const arr = map[dni] || [];
+      arr.push(msg); map[dni] = arr;
+      try{ saveMsgs(map); }
+      catch(e){
+        if (e && (e.name === 'QuotaExceededError' || e.code === 22)){
+          const removeCount = Math.max(1, Math.floor(arr.length * 0.1));
+          arr.splice(0, removeCount); map[dni] = arr;
+          try{ saveMsgs(map); showToast('Aviso','Historial grande: se eliminaron mensajes muy viejos.'); }
+          catch(_){ showToast('Error','No se pudo guardar el mensaje por falta de espacio.'); }
+        } else { showToast('Error','No se pudo guardar el mensaje.'); }
+      }
+    }
+    function renderChat(dni){
+      const box=$('#fChat'); const list=(loadMsgs()[dni]||[]).sort((a,b)=>new Date(a.ts)-new Date(b.ts));
+      box.innerHTML = list.length? list.map(m=>{
+        const dt=new Date(m.ts);
+        const visto=m.seen?'<span class="text-success fw-semibold">Visto</span>':'<span class="text-muted">No visto</span>';
+        return `<div class="msg ${m.from==='Aprobador'?'me':''}"><div>${escapeHTML(m.text)}</div>
+          <div class="meta small text-muted mt-1"><span>De: <strong>${escapeHTML(m.from)}</strong></span>
+          <span class="ms-2">${dt.toLocaleDateString()} ${dt.toLocaleTimeString([], {hour:'2-digit',minute:'2-digit'})}</span>
+          <span class="ms-2">${visto}</span></div></div>`;
+      }).join('') : `<div class="text-muted small">Sin mensajes aún.</div>`;
+      $('#btnMsgSend').onclick=()=>{
+        const ta=$('#msgText'); const text=(ta.value||'').trim(); if(!text) return;
+        pushMsgNoLimit(dni, { id:Date.now(), from:'Aprobador', text, ts:new Date().toISOString(), seen:false });
+        ta.value=''; renderChat(dni);
+        notifyAspirante(dni,'Nuevo mensaje',text.slice(0,120),text.slice(0,120));
+        logMove(dni,'mensaje','Mensaje enviado',text.slice(0,120),'Aprobador');
+      };
+      $('#btnMarkAll').onclick=()=>{
+        const map=loadMsgs(); const arr=map[dni]||[]; arr.forEach(m=>m.seen=true); map[dni]=arr; saveMsgs(map);
+        renderChat(dni); logMove(dni,'mensaje','Mensajes marcados como vistos','','Aprobador');
+      };
+      $('#btnMsgSync').onclick=async()=>{
+        try{
+          if(window.PFA_API?.getMessages){
+            const api=await PFA_API.getMessages(dni);
+            const incoming=(api||[]).map(x=>({id:x.id,from:x.from||'Aspirante',text:x.text||'',ts:x.ts||x.date||new Date().toISOString(),seen:!!x.seen}));
+            const store=loadMsgs(); const cur=store[dni]||[]; const keys=new Set(cur.map(m=>m.from+'|'+m.text+'|'+new Date(m.ts).toISOString()));
+            let add=0; for(const m of incoming){ const key=m.from+'|'+m.text+'|'+new Date(m.ts).toISOString().slice(0,16); if(!keys.has(key)){ cur.push(m); add++; } }
+            if(add){ cur.sort((a,b)=>new Date(a.ts)-new Date(b.ts)); store[dni]=cur; saveMsgs(store); logMove(dni,'mensaje','Sincronización de mensajes','Nuevos mensajes recibidos'); }
+            showToast(add?'Historial actualizado':'Sin cambios', add?'Se sincronizaron mensajes.':'No hay mensajes nuevos.');
+            if(add) renderChat(dni);
+          }
+        }catch(_){ showToast('Sin cambios','No hay mensajes nuevos.'); }
+      };
+      $('#btnExpOne').onclick=async()=>{ await exportOne(dni); };
+    }
+
+    /* ===== Timeline ===== */
+    function renderTimeline(dni){
+      const wrap=$('#timeline');
+      const movs=(loadMovs()[dni]||[]).slice().sort((a,b)=>new Date(b.ts)-new Date(a.ts));
+      const filtered=movs.filter(m=>TL_FILTER==='ALL'?true:m.tipo===TL_FILTER);
+      wrap.innerHTML=filtered.length? filtered.map(m=>
+        `<div class="t-item"><div class="t-label">${escapeHTML(m.label)}</div>
+          <div class="t-meta">${fmtDateTime(m.ts)} — ${escapeHTML(m.who||'')} • <span class="text-muted">${m.tipo}</span></div>
+          ${m.detail?`<div class="small mt-1">${escapeHTML(m.detail)}</div>`:''}
+        </div>`).join('') : `<div class="text-muted small">Sin movimientos.</div>`;
+    }
+    document.querySelectorAll('[data-tf]').forEach(btn=>{
+      btn.addEventListener('click',()=>{
+        document.querySelectorAll('[data-tf]').forEach(b=>b.classList.remove('btn-primary'));
+        btn.classList.add('btn-primary'); TL_FILTER=btn.getAttribute('data-tf');
+        if(CURRENT_DNI) renderTimeline(CURRENT_DNI);
+      });
+    });
+    $('#btnExpMovs').onclick=()=>{ if(CURRENT_DNI) downloadJSON(`movimientos_${CURRENT_DNI}.json`, loadMovs()[CURRENT_DNI]||[]); };
+
+    async function selectDNI(dni){ CURRENT_DNI=dni; const it=DATA.find(x=>x.dni===dni); if(!it) return; ensurePlazoStart(it); setFicha(it); }
+
+    /* ===== Acciones ===== */
+    $('#btnAprobar').onclick=()=>{
+      if(!CURRENT_DNI) return; const it=DATA.find(x=>x.dni===CURRENT_DNI); if(!it) return;
+      const chk=canElevate(it.dni); if(!chk.ok){ alert('No se puede elevar: '+chk.reason); return; }
+      const prev=it.estado; it.estado='ELEVADO'; save();
+      const exp=expedienteFromDNI(it.dni);
+      notifyAspirante(it.dni,'Aprobación y elevación',`Tu trámite fue elevado. Nº de expediente: ${exp}`,`Expediente: ${exp}`);
+      showToast('Trámite elevado',`Nº de expediente: ${exp}`);
+      logMove(it.dni,'estado',`${prev} → ELEVADO`,`Expediente: ${exp}`,'Aprobador');
+      renderLista(); setFicha(it);
+    };
+    $('#btnRechazar').onclick=()=>{
+      if(!CURRENT_DNI) return; const it=DATA.find(x=>x.dni===CURRENT_DNI); if(!it) return;
+      const prev=it.estado; it.estado='RECHAZADO'; save();
+      notifyAspirante(it.dni,'Resultado de revisión','Tu trámite fue marcado como NO APTO / RECHAZADO.','Revisá tus observaciones.');
+      showToast('Trámite actualizado','Marcado como RECHAZADO.');
+      logMove(it.dni,'estado',`${prev} → RECHAZADO`,'','Aprobador');
+      renderLista(); setFicha(it);
+    };
+    document.querySelectorAll('[data-med]').forEach(btn=>{
+      btn.addEventListener('click',()=>{
+        if(!CURRENT_DNI) return;
+        const val=btn.getAttribute('data-med');
+        const approvals=loadApprovals(); const cur=approvals[CURRENT_DNI]||{};
+        const med={...(cur.med||{}),estado:val,fecha: val==='RECIBIDO'?new Date().toISOString() : (val==='PENDIENTE'?null:(cur.med?.fecha||null))};
+        approvals[CURRENT_DNI]={...cur,med}; saveApprovals(approvals);
+        logMove(CURRENT_DNI,'med',`Estudios médicos → ${val}`,'','Aprobador');
+        setFicha(DATA.find(x=>x.dni===CURRENT_DNI)); updateApproveButton(CURRENT_DNI);
+      });
+    });
+
+    /* ===== Export ===== */
+    function downloadJSON(filename,obj){
+      const blob=new Blob([JSON.stringify(obj,null,2)],{type:'application/json'});
+      const a=document.createElement('a'); a.href=URL.createObjectURL(blob); a.download=filename; document.body.appendChild(a); a.click(); a.remove();
+    }
+    async function exportOne(dni){
+      const approvals=loadApprovals(); const messages=loadMsgs(); const movs=loadMovs();
+      const it=DATA.find(x=>x.dni===dni)||{}; const docs = await listDocs(dni);
+      downloadJSON(`expediente_${dni}.json`, { exportedAt:new Date().toISOString(), aspirante:it, checklist:approvals[dni]?.docs||{}, med:approvals[dni]?.med||{estado:'PENDIENTE',fecha:null}, messages:messages[dni]||[], docs, movimientos:movs[dni]||[] });
+    }
+    async function exportAll(){
+      const approvals=loadApprovals(); const messages=loadMsgs(); const movs=loadMovs();
+      const dnis=new Set([...DATA.map(x=>x.dni), ...Object.keys(approvals), ...Object.keys(messages)]);
+      const items=[]; for(const dni of dnis){ const it=DATA.find(x=>x.dni===dni)||{}; const docs=await listDocs(dni);
+        items.push({ aspirante:it, checklist:approvals[dni]?.docs||{}, med:approvals[dni]?.med||{estado:'PENDIENTE',fecha:null}, messages:messages[dni]||[], docs, movimientos:movs[dni]||[] });
+      }
+      downloadJSON(`expedientes_${new Date().toISOString().slice(0,10)}.json`, {exportedAt:new Date().toISOString(), items});
+    }
+    $('#btnExportAll').onclick=exportAll;
+
+    /* ===== Importar / consultar / filtros ===== */
+    async function importarDNI(){
+      const dni=$('#dniImport').value.trim();
+      if(!dni){ alert('Ingresá un DNI.'); return; }
+      let pre=null, ck=null, nombre='';
+      let region='AMBA', provincia='CABA', zonaAMBA=null;
+      try{ pre=await PFA_API.getPreinscripcion?.(dni);}catch(_){} try{ ck =await PFA_API.getChecklist?.(dni);}catch(_){}
+      nombre=pre?.nombre||ck?.nombre||'';
+      // Si tiene localidad conocida, inferimos zona AMBA por partido
+      const loc=(pre?.domAct?.loc||'').toString();
+      if(pre?.domAct?.prov){ region='INTERIOR'; provincia=pre.domAct.prov; zonaAMBA=null;
+      } else {
+        region='AMBA'; provincia='CABA';
+        const upper=loc.toLowerCase();
+        function belongs(list){ return list.some(x=>upper.includes(x.toLowerCase())); }
+        if(belongs(ZONAS_AMBA.NORTE)) zonaAMBA='NORTE';
+        else if(belongs(ZONAS_AMBA.SUR)) zonaAMBA='SUR';
+        else if(belongs(ZONAS_AMBA.OESTE)) zonaAMBA='OESTE';
+      }
+      if(DATA.some(x=>x.dni===dni)){ showToast('Ya existe',`El DNI ${dni} ya está listado.`); return; }
+      const nuevo={dni, nombre, estado:'APROBACION_PENDIENTE', region, provincia, zonaAMBA, plazoDesde:new Date().toISOString(), autoReminders:true};
+      DATA.unshift(nuevo); save();
+      showToast('Importado', `DNI ${dni} en Aprobadores.`); logMove(dni,'estado','Ingreso a Aprobadores','Importación por DNI','Aprobador');
+      renderLista();
+    }
+    async function consultarDNI(){
+      const dni=$('#dniImport').value.trim();
+      if(!dni){ alert('Ingresá un DNI.'); return; }
+      const it=DATA.find(x=>x.dni===dni);
+      if(it){ renderLista(); if(!gotoDNI(dni)) showToast('Consulta', `DNI ${dni}${it?.nombre?' — '+it.nombre:''}`); else selectDNI(dni); return; }
+      showToast('Consulta', `DNI ${dni}: APROBACION_PENDIENTE (no listado)`);
+    }
+
+    /* ===== Demo ===== */
+    function addServerDocs(dni, docs){
+      SERVER_DOCS[dni] = (SERVER_DOCS[dni]||[]).concat(docs.map(d=>({ id: d.id || (Date.now()+Math.random()), name: d.name, mime: d.mime || inferMimeByName(d.name), url: d.url, uploadedAt: d.uploadedAt || new Date().toISOString() })));
+      docs.forEach(d=> logMove(dni,'doc','Documento cargado', d.name, 'Servidor (demo)'));
+    }
+    function addDemoMsgs(dni,msgs){
+      const map=loadMsgs(); const arr=map[dni]||[];
+      msgs.forEach(m=>arr.push({id:Date.now()+Math.floor(Math.random()*1000), from:m.from, text:m.text, ts:m.ts||new Date().toISOString(), seen:!!m.seen}));
+      arr.sort((a,b)=>new Date(a.ts)-new Date(b.ts)); map[dni]=arr; saveMsgs(map);
+      logMove(dni,'mensaje','Historial inicial (demo)','', 'Servidor');
+    }
+    function setDemoApprovals(dni,{docs={},med={}}){
+      const ap=loadApprovals(); ap[dni]={docs,med}; saveApprovals(ap);
+      if(med?.estado) logMove(dni,'med',`Estudios médicos → ${med.estado}`,'Carga demo','Servidor');
+      Object.entries(docs).forEach(([k,v])=>logMove(dni,'checklist',`${k} → ${v}`,'Carga demo','Servidor'));
+    }
+    function seedDemo(){
+      const demo=[
+        {dni:'34567890', nombre:'Pérez, Juan', estado:'APROBACION_PENDIENTE', region:'AMBA', zonaAMBA:'NORTE', provincia:'CABA', plazoDesde:new Date(Date.now()-12*86400000).toISOString(), autoReminders:true},
+        {dni:'32123456', nombre:'Gómez, Ana', estado:'APROBACION_PENDIENTE', region:'INTERIOR', provincia:'Buenos Aires', plazoDesde:new Date(Date.now()-5*86400000).toISOString(), autoReminders:true},
+        {dni:'33888999', nombre:'Sosa, Marta', estado:'ELEVADO', region:'INTERIOR', provincia:'Santa Fe'},
+        {dni:'31222333', nombre:'Ruiz, Sofía', estado:'RECHAZADO', region:'AMBA', zonaAMBA:'OESTE', provincia:'CABA'}
+      ];
+      const set=new Set(DATA.map(x=>x.dni)); demo.forEach(d=>{ if(!set.has(d.dni)) DATA.push(d); }); save();
+      demo.forEach(d=>logMove(d.dni,'estado','Carga demo',`Estado: ${d.estado}`,'Servidor'));
+      addServerDocs('34567890',[ {name:'DNI (frente y dorso).pdf', url:'https://www.w3.org/WAI/ER/tests/xhtml/testfiles/resources/pdf/dummy.pdf', mime:'application/pdf'}, {name:'Estudios médicos.jpg', url:'https://via.placeholder.com/1200x800.jpg', mime:'image/jpeg'}, {name:'Certificado de antecedentes.pdf', url:'https://www.w3.org/WAI/ER/tests/xhtml/testfiles/resources/pdf/dummy.pdf'} ]);
+      addServerDocs('32123456',[ {name:'DNI (frente y dorso).jpg', url:'https://via.placeholder.com/1000x700.jpg'}, {name:'Partida de nacimiento.pdf', url:'https://www.w3.org/WAI/ER/tests/xhtml/testfiles/resources/pdf/dummy.pdf'} ]);
+      setDemoApprovals('34567890',{ docs:{'DNI (frente y dorso)':'OK','Partida de nacimiento':'OK','Certificado de antecedentes':'OBS','Estudios/Analítico':'OK','Domicilio actualizado':'FALTA','Foto 4x4':'OK','Declaración jurada firmada':'OK','Estudios médicos':'OK'}, med:{estado:'RECIBIDO',fecha:new Date(Date.now()-2*86400000).toISOString()} });
+      setDemoApprovals('32123456',{ docs:{'DNI (frente y dorso)':'OK','Partida de nacimiento':'OK','Certificado de antecedentes':'FALTA','Estudios/Analítico':'OBS','Domicilio actualizado':'FALTA','Foto 4x4':'FALTA','Declaración jurada firmada':'OK','Estudios médicos':'OBS'}, med:{estado:'OBS',fecha:new Date().toISOString()} });
+      addDemoMsgs('34567890',[ {from:'Aprobador',text:'Hola Juan, recordá subir el certificado de antecedentes.',ts:new Date(Date.now()-11*86400000).toISOString(),seen:true}, {from:'Aspirante',text:'Gracias, lo subo hoy.',ts:new Date(Date.now()-11*86400000+3600e3).toISOString(),seen:true}, {from:'Aprobador',text:'Visto. Cuando esté, avisame por acá.',ts:new Date(Date.now()-10*86400000).toISOString(),seen:false} ]);
+      renderLista();
+      if(FILTERED.length){ selectDNI(FILTERED[0].dni); gotoDNI(FILTERED[0].dni); }
+      showToast('Demo','Agentes + documentación (API) + carga local habilitada + zonas AMBA.');
+    }
+
+    /* ===== Filtros / eventos ===== */
+    function populateProvs(){
+      const sel=$('#filtroProvincia'); const prev=sel.value||'ALL';
+      sel.innerHTML=`<option value="ALL">Todas las provincias</option>`+PROVINCIAS.map(p=>`<option value="${p}">${p}</option>`).join('');
+      sel.value=PROVINCIAS.includes(prev)?prev:'ALL';
+    }
+    function debounce(fn,ms){ let t; return (...a)=>{ clearTimeout(t); t=setTimeout(()=>fn(...a),ms); }; }
+    $('#q').addEventListener('input',debounce(renderLista,150));
+    $('#filtroEstado').addEventListener('change',renderLista);
+    $('#filtroRegion').addEventListener('change',()=>{
+      const v=$('#filtroRegion').value;
+      $('#filtroZona').style.display = v==='AMBA' ? '' : 'none';
+      renderLista();
+    });
+    $('#filtroZona').addEventListener('change',renderLista);
+    $('#filtroProvincia').addEventListener('change',()=>{
+      const v=$('#filtroProvincia').value;
+      if(v==='ALL'){} else if(v==='CABA') $('#filtroRegion').value='AMBA';
+      else $('#filtroRegion').value='INTERIOR';
+      $('#filtroZona').style.display = $('#filtroRegion').value==='AMBA' ? '' : 'none';
+      renderLista();
+    });
+    $('#btnResetFiltros').addEventListener('click',()=>{
+      $('#q').value=''; $('#filtroEstado').value='ALL'; $('#filtroRegion').value='ALL'; $('#filtroProvincia').value='ALL'; $('#filtroZona').value='ALL'; $('#filtroZona').style.display='none'; renderLista();
+    });
+    $('#btnImportar').addEventListener('click',importarDNI);
+    $('#btnConsultar').addEventListener('click',consultarDNI);
+    $('#btnSeed').addEventListener('click',seedDemo);
+    $('#btnVaciar').addEventListener('click',()=>{
+      if(!confirm('¿Vaciar todo?')) return;
+      DATA=[]; save();
+      localStorage.removeItem(APPROVALS_KEY);
+      localStorage.removeItem(MESSAGES_KEY);
+      localStorage.removeItem(DOCS_KEY);
+      localStorage.removeItem(MOVS_KEY);
+      SERVER_DOCS={};
+      setFichaEmpty(); renderLista();
+    });
+
+    document.addEventListener('keydown',e=>{
+      if((e.ctrlKey||e.metaKey)&&e.key.toLowerCase()==='k'){ e.preventDefault(); $('#q').focus(); $('#q').select(); }
+      if(e.target===$('#dniImport')&&e.key==='Enter'){ e.preventDefault(); consultarDNI(); }
+      if(e.target===$('#msgText')&&(e.ctrlKey||e.metaKey)&&e.key==='Enter'){ e.preventDefault(); $('#btnMsgSend').click(); }
+    });
+
+    /* ===== Recordatorios ===== */
+    function processAutoReminders(){
+      const approvals=loadApprovals(); const today=new Date(); let sent=0;
+      DATA.forEach(it=>{
+        if(it.estado!=='APROBACION_PENDIENTE'||!it.plazoDesde||it.autoReminders===false) return;
+        const passed=Math.floor((today-new Date(it.plazoDesde))/86400000);
+        it.remindersSent=it.remindersSent||{};
+        REMINDER_DAYS.forEach(d=>{
+          if(passed>=d && !it.remindersSent[d]){
+            const docsMap=approvals[it.dni]?.docs||{};
+            const falt=Object.entries(docsMap).filter(([,st])=>st==='FALTA').map(([k])=>k);
+            const prev=falt.length?`Te falta: ${falt.slice(0,3).join(', ')}${falt.length>3?'…':''}`:'Recordatorio automático.';
+            notifyAspirante(it.dni,'Recordatorio de documentación',`Han pasado ${d} días desde el ingreso. Presentá la documentación pendiente.`,prev);
+            it.remindersSent[d]=true; sent++;
+            logMove(it.dni,'recordatorio',`Recordatorio automático (día ${d})`,prev,'Sistema');
+          }
+        });
+      });
+      if(sent>0) save();
+    }
+
+    /* ===== RBAC ===== */
+    const ROLES={ APROBADOR:['import','consult','seed','vaciar','export_all','approve','reject','docs_view','docs_upload','doc_mark','checklist_edit','med_update','msg_view','msg_send','msg_sync','msg_mark_seen','export_one','timeline_view','export_movs','datos_view'], SUPERVISOR:['import','consult','export_all','docs_view','msg_view','export_one','timeline_view','export_movs','datos_view'], MEDICO:['import','consult','docs_view','med_update','msg_view','export_one','timeline_view'], MESA:['import','consult','seed','vaciar','export_all','docs_view','datos_view'], ASPIRANTE:['docs_view','docs_upload','msg_view','msg_send','datos_view'] };
+    let CURRENT_ROLE=(new URLSearchParams(location.search).get('role')||'APROBADOR').toUpperCase();
+    function tag(sel,feature){ document.querySelectorAll(sel).forEach(el=>el.setAttribute('data-feature',feature)); }
+    function tagStaticFeatures(){
+      tag('#btnImportar','import'); tag('#btnConsultar','consult'); tag('#btnSeed','seed'); tag('#btnVaciar','vaciar'); tag('#btnExportAll','export_all');
+      tag('#btnAprobar','approve'); tag('#btnRechazar','reject');
+      const datosCard=document.getElementById('fDatos')?.closest('.card'); if(datosCard) datosCard.setAttribute('data-feature','datos_view');
+      const docsCard=document.getElementById('fDocs')?.closest('.card'); if(docsCard) docsCard.setAttribute('data-feature','docs_view');
+      const chatCard=document.getElementById('fChat')?.closest('.card'); if(chatCard) chatCard.setAttribute('data-feature','msg_view');
+      tag('#fChecklist','checklist_edit'); tag('#btnDocsRef','docs_view'); tag('#btnDocsUpload','docs_upload'); tag('#btnAdjMed','docs_upload');
+      tag('#fChat','msg_view'); tag('#btnMsgSend','msg_send'); tag('#btnMsgSync','msg_sync'); tag('#btnMarkAll','msg_mark_seen'); tag('#btnExpOne','export_one');
+      tag('#timeline','timeline_view'); tag('#btnExpMovs','export_movs');
+    }
+    function applyRoleUI(){
+      tagStaticFeatures(); const allowed=new Set(ROLES[CURRENT_ROLE]||[]);
+      document.querySelectorAll('[data-feature]').forEach(el=>{
+        const f=el.getAttribute('data-feature'); const ok=allowed.has(f);
+        if(!ok){
+          if(el.matches('button,a,input,select,textarea')){ el.disabled=true; el.classList.add('disabled'); }
+          if(!el.closest('.modal')) el.hidden=true;
+        } else { el.hidden=false; el.disabled=false; el.classList.remove('disabled'); }
+      });
+      document.querySelectorAll('#fChecklist .list-group-item').forEach(li=> li.style.pointerEvents = allowed.has('checklist_edit')?'auto':'none');
+      document.querySelectorAll('[data-med]').forEach(btn=> btn.hidden = !allowed.has('med_update'));
+      document.querySelectorAll('.t-pills [data-tf]').forEach(btn=> btn.hidden = !allowed.has('timeline_view'));
+      const btnExpMovs=document.getElementById('btnExpMovs'); if(btnExpMovs) btnExpMovs.hidden=!allowed.has('export_movs');
+    }
+
+    /* ===== Init ===== */
+    function populateProvs(){ const sel=$('#filtroProvincia'); const prev=sel.value||'ALL';
+      sel.innerHTML=`<option value="ALL">Todas las provincias</option>`+PROVINCIAS.map(p=>`<option value="${p}">${p}</option>`).join('');
+      sel.value=PROVINCIAS.includes(prev)?prev:'ALL';
+    }
+    populateProvs();
+
+    // Migraciones + compatibilidad
+    let migrated=false;
+    for(const it of DATA){
+      if(['PREINSCRIPCION','PSICO_PENDIENTE','PREMEDICO_PENDIENTE','FORMALIZACION_PENDIENTE'].includes(it.estado)){
+        it.estado='APROBACION_PENDIENTE'; migrated=true; logMove(it.dni,'estado','Migrado a Aprobadores','','Sistema');
+      }
+      if(!it.region){ it.region='AMBA'; it.provincia=it.provincia||'CABA'; migrated=true; logMove(it.dni,'region','Región asignada','AMBA/CABA','Sistema'); }
+      ensurePlazoStart(it);
+    }
+    if(migrated) save();
+
+    renderLista(); setFichaEmpty(); applyRoleUI(); processAutoReminders();
+    setInterval(processAutoReminders,15*60*1000);
+    document.querySelectorAll('[data-bs-toggle="tooltip"]').forEach(el=> new bootstrap.Tooltip(el));
+  })();
+  </script>
+</body>
+</html>

@@ -1,0 +1,1634 @@
+<!doctype html>
+<html lang="es">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>SGI – Oficial Mesa de Aprobadores (Modo Claro)</title>
+
+  <!-- Bootstrap 5 -->
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+  <!-- Bootstrap Icons -->
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.css" rel="stylesheet">
+  <!-- FullCalendar -->
+  <link href="https://cdn.jsdelivr.net/npm/fullcalendar@6.1.14/main.min.css" rel="stylesheet">
+
+  <style>
+    :root {
+      --bg-main: #eef2f7;
+      --bg-card: #ffffff;
+      --border-subtle: #d0d7de;
+      --text-main: #212529;
+      --text-muted: #6c757d;
+      --accent: #0d6efd;
+      --accent-strong: #004b9b;
+    }
+
+    * { box-sizing: border-box; }
+
+    body {
+      margin: 0;
+      background-color: var(--bg-main);
+      color: var(--text-main);
+      font-family: 'Segoe UI', system-ui, -apple-system, sans-serif;
+      font-size: 16px;
+    }
+
+    /* Header */
+    header {
+      background: linear-gradient(90deg, #003366, #0055aa);
+      color: #ffffff;
+      padding: 14px 20px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      flex-wrap: wrap;
+      gap: 12px;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.35);
+    }
+
+    .header-left {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+
+    .logo-pfa {
+      width: 50px;
+      height: 50px;
+      border-radius: 50%;
+      background: radial-gradient(circle at 30% 30%, #ffffff 0, #ffc107 30%, #003366 60%, #00152e 100%);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-weight: 700;
+      font-size: 0.8rem;
+      text-align: center;
+      padding: 5px;
+    }
+
+    .header-title span:first-child {
+      font-size: 0.95rem;
+      opacity: 0.9;
+    }
+
+    .header-title span:last-child {
+      font-size: 1.3rem;
+      font-weight: 700;
+    }
+
+    .header-right {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      flex-wrap: wrap;
+    }
+
+    .badge-rol {
+      background-color: rgba(255,255,255,0.18);
+      border-radius: 999px;
+      padding: 6px 14px;
+      font-size: 0.9rem;
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+    }
+
+    .user-pill {
+      background-color: rgba(0,0,0,0.18);
+      border-radius: 999px;
+      padding: 6px 14px;
+      font-size: 1rem;
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .main-wrapper {
+      padding: 16px;
+    }
+
+    /* Sidebar */
+    .sidebar {
+      background-color: var(--bg-card);
+      border-radius: 16px;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+      padding: 14px;
+      border: 1px solid var(--border-subtle);
+      height: 100%;
+    }
+
+    .sidebar-title {
+      font-size: 0.9rem;
+      text-transform: uppercase;
+      letter-spacing: 0.09em;
+      color: var(--text-muted);
+      margin-bottom: 8px;
+    }
+
+    .sidebar .nav-link {
+      font-size: 0.98rem;
+      border-radius: 12px;
+      margin-bottom: 6px;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      color: var(--text-main);
+      background-color: transparent;
+      border: none;
+      text-align: left;
+      padding: 8px 10px;
+    }
+
+    .sidebar .nav-link i {
+      font-size: 1.1rem;
+    }
+
+    .sidebar .nav-link.active {
+      background: linear-gradient(90deg, #003366, #0055aa);
+      color: #ffffff;
+    }
+
+    .sidebar .nav-link:hover {
+      background-color: rgba(13,110,253,0.1);
+    }
+
+    /* Content */
+    .content-area {
+      padding-left: 4px;
+    }
+
+    .main-section {
+      display: none;
+    }
+    .main-section.active {
+      display: block;
+    }
+
+    .card-soft {
+      background-color: var(--bg-card);
+      border-radius: 16px;
+      border: 1px solid var(--border-subtle);
+      box-shadow: 0 2px 8px rgba(15,23,42,0.06);
+      color: var(--text-main);
+    }
+
+    .card-soft .card-header {
+      background-color: #f8f9fa;
+      border-bottom: 1px solid var(--border-subtle);
+    }
+
+    .metric-label {
+      font-size: 0.8rem;
+      text-transform: uppercase;
+      letter-spacing: 0.08em;
+      color: var(--text-muted);
+      margin-bottom: 4px;
+    }
+
+    .metric-value {
+      font-size: 1.5rem;
+      font-weight: 600;
+    }
+
+    .small-label {
+      font-size: 0.85rem;
+      color: var(--text-muted);
+    }
+
+    .table {
+      color: var(--text-main);
+    }
+
+    .table thead tr {
+      background-color: #f1f3f5;
+    }
+
+    .table thead th {
+      border-bottom-color: var(--border-subtle);
+      color: var(--text-muted);
+    }
+
+    .table tbody tr:hover {
+      background-color: #f8f9fa;
+    }
+
+    .table-sm th,
+    .table-sm td {
+      font-size: 0.9rem;
+      vertical-align: middle;
+      padding: 8px;
+    }
+
+    .form-control,
+    .form-select {
+      font-size: 0.9rem;
+    }
+
+    .form-control:focus,
+    .form-select:focus {
+      border-color: var(--accent);
+      box-shadow: 0 0 0 0.15rem rgba(13,110,253,0.25);
+    }
+
+    .input-group-text {
+      background-color: #f8f9fa;
+    }
+
+    .badge-estado {
+      font-size: 0.75rem;
+      border-radius: 999px;
+      padding: 4px 10px;
+    }
+
+    .badge {
+      font-size: 0.75rem;
+    }
+
+    .alert {
+      border-radius: 12px;
+      font-size: 0.85rem;
+    }
+
+    .chat-container {
+      border-radius: 16px;
+      border: 1px solid var(--border-subtle);
+      background-color: #ffffff;
+      display: flex;
+      height: 430px;
+      overflow: hidden;
+    }
+
+    .chat-sidebar {
+      width: 32%;
+      border-right: 1px solid var(--border-subtle);
+      padding: 8px;
+      overflow-y: auto;
+      background-color: #f8f9fa;
+    }
+
+    .chat-main {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      padding: 8px;
+    }
+
+    .chat-message-list {
+      flex: 1;
+      overflow-y: auto;
+      padding: 4px;
+      margin-bottom: 8px;
+    }
+
+    .chat-message {
+      margin-bottom: 8px;
+      font-size: 0.88rem;
+      padding: 8px 10px;
+      border-radius: 10px;
+      max-width: 85%;
+    }
+
+    .chat-message.me {
+      background-color: #e7f1ff;
+      margin-left: auto;
+    }
+
+    .chat-message.other {
+      background-color: #f1f3f5;
+      margin-right: auto;
+      border: 1px solid #dee2e6;
+    }
+
+    .calendar-wrapper {
+      background-color: var(--bg-card);
+      border-radius: 16px;
+      border: 1px solid var(--border-subtle);
+      padding: 10px;
+      box-shadow: 0 2px 8px rgba(15,23,42,0.06);
+    }
+
+    #calendar {
+      max-width: 100%;
+      margin-top: 8px;
+      background-color: #ffffff;
+      border-radius: 10px;
+      padding: 6px;
+    }
+
+    .calendar-legend span {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      margin-right: 10px;
+      font-size: 0.8rem;
+    }
+
+    .legend-dot {
+      width: 10px;
+      height: 10px;
+      border-radius: 50%;
+      display: inline-block;
+    }
+
+    .fc {
+      font-size: 0.85rem;
+    }
+
+    .fc .fc-toolbar-title {
+      font-size: 1rem;
+    }
+
+    @media (max-width: 991.98px) {
+      .sidebar { margin-bottom: 10px; }
+    }
+  </style>
+</head>
+<body>
+
+<header>
+  <div class="header-left">
+    <div class="logo-pfa">
+      PFA<br>SGI
+    </div>
+    <div class="header-title">
+      <span>Policía Federal Argentina</span>
+      <span>SGI – Oficial Mesa de Aprobadores</span>
+    </div>
+  </div>
+  <div class="header-right">
+    <span class="badge-rol">
+      <i class="bi bi-shield-check"></i> Perfil: Oficial Mesa de Aprobadores
+    </span>
+    <span class="user-pill">
+      <i class="bi bi-person-circle"></i> Oficial Carla Denise Acevedo
+    </span>
+    <button class="btn btn-sm btn-outline-light">
+      <i class="bi bi-box-arrow-right"></i> Cerrar sesión
+    </button>
+  </div>
+</header>
+
+<div class="container-fluid main-wrapper">
+  <div class="row">
+    <!-- SIDEBAR -->
+    <div class="col-12 col-lg-3 col-xl-2 mb-3 mb-lg-0">
+      <div class="sidebar">
+        <div class="sidebar-title">Panel del Oficial</div>
+        <nav class="nav flex-column">
+          <button class="nav-link active" data-section="dashboard" type="button">
+            <i class="bi bi-grid-1x2"></i> Dashboard
+          </button>
+          <button class="nav-link" data-section="tramites" type="button">
+            <i class="bi bi-folder2-open"></i> Gestión de Trámites
+          </button>
+          <button class="nav-link" data-section="usuarios" type="button">
+            <i class="bi bi-people"></i> Usuarios a Cargo
+          </button>
+          <button class="nav-link" data-section="mensajes" type="button">
+            <i class="bi bi-chat-dots"></i> Mensajes a Aprobadores
+          </button>
+          <button class="nav-link" data-section="estadisticas" type="button">
+            <i class="bi bi-bar-chart-line"></i> Estadísticas
+          </button>
+          <button class="nav-link" data-section="calendario" type="button">
+            <i class="bi bi-calendar-event"></i> Calendario de Vacaciones
+          </button>
+          <button class="nav-link" data-section="suplencias" type="button">
+            <i class="bi bi-arrow-repeat"></i> Suplencias entre Oficiales
+          </button>
+        </nav>
+      </div>
+    </div>
+
+    <!-- CONTENT -->
+    <div class="col-12 col-lg-9 col-xl-10 content-area">
+
+      <!-- DASHBOARD -->
+      <section id="section-dashboard" class="main-section active">
+        <div class="row g-3 mb-3">
+          <div class="col-6 col-xl-3">
+            <div class="card card-soft">
+              <div class="card-body">
+                <div class="metric-label">En proceso</div>
+                <div class="metric-value text-primary" id="dash-en-proceso">0</div>
+                <div class="small text-muted">Trámites activos</div>
+              </div>
+            </div>
+          </div>
+          <div class="col-6 col-xl-3">
+            <div class="card card-soft">
+              <div class="card-body">
+                <div class="metric-label">Condicionales</div>
+                <div class="metric-value text-warning" id="dash-condicionales">0</div>
+                <div class="small text-muted">Pendientes de subsanar</div>
+              </div>
+            </div>
+          </div>
+          <div class="col-6 col-xl-3">
+            <div class="card card-soft">
+              <div class="card-body">
+                <div class="metric-label">Finalizados</div>
+                <div class="metric-value text-success" id="dash-finalizados">0</div>
+                <div class="small text-muted">Aptos para siguiente etapa</div>
+              </div>
+            </div>
+          </div>
+          <div class="col-6 col-xl-3">
+            <div class="card card-soft">
+              <div class="card-body">
+                <div class="metric-label">Archivados</div>
+                <div class="metric-value text-secondary" id="dash-archivados">0</div>
+                <div class="small text-muted">Cerrados / sin continuidad</div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div class="row g-3">
+          <div class="col-12 col-xl-6">
+            <div class="card card-soft">
+              <div class="card-header d-flex justify-content-between align-items-center">
+                <span class="small-label">Resumen por tipo de aspirante</span>
+                <span class="badge text-bg-light border">
+                  <i class="bi bi-person-badge"></i> Cadetes y Agentes
+                </span>
+              </div>
+              <div class="card-body">
+                <table class="table table-sm mb-0">
+                  <thead>
+                    <tr>
+                      <th>Tipo</th>
+                      <th>En proceso</th>
+                      <th>Condicionales</th>
+                      <th>Finalizados</th>
+                      <th>Archivados</th>
+                    </tr>
+                  </thead>
+                  <tbody id="tabla-resumen-tipo">
+                  </tbody>
+                </table>
+              </div>
+            </div>
+          </div>
+
+          <div class="col-12 col-xl-6">
+            <div class="card card-soft">
+              <div class="card-header d-flex justify-content-between align-items-center">
+                <span class="small-label">Trámites por estado (general)</span>
+                <span class="badge text-bg-light border">
+                  <i class="bi bi-bar-chart"></i> Vista rápida
+                </span>
+              </div>
+              <div class="card-body">
+                <canvas id="chartEstadosDashboard" height="130"></canvas>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- GESTIÓN DE TRÁMITES -->
+      <section id="section-tramites" class="main-section">
+        <div class="card card-soft mb-3">
+          <div class="card-header">
+            <strong>Gestión de Trámites</strong>
+          </div>
+          <div class="card-body">
+            <div class="row g-2 mb-3">
+              <div class="col-6 col-xl-2">
+                <label class="form-label">Tipo aspirante</label>
+                <select class="form-select form-select-sm" id="filtro-tipo">
+                  <option value="">Todos</option>
+                  <option value="Cadete">Cadete</option>
+                  <option value="Agente">Agente</option>
+                </select>
+              </div>
+              <div class="col-6 col-xl-2">
+                <label class="form-label">Escalafón</label>
+                <select class="form-select form-select-sm" id="filtro-escalafon">
+                  <option value="">Todos</option>
+                  <option value="Seguridad">Seguridad</option>
+                  <option value="Comunicaciones">Comunicaciones</option>
+                  <option value="Bomberos">Bomberos</option>
+                  <option value="Ciberseguridad">Ciberseguridad</option>
+                </select>
+              </div>
+              <div class="col-6 col-xl-2">
+                <label class="form-label">Zona</label>
+                <select class="form-select form-select-sm" id="filtro-zona">
+                  <option value="">Todas</option>
+                  <option value="CABA">CABA</option>
+                  <option value="AMBA Sur">AMBA Sur</option>
+                  <option value="AMBA Noroeste">AMBA Noroeste</option>
+                  <option value="Interior">Interior</option>
+                </select>
+              </div>
+              <div class="col-6 col-xl-2">
+                <label class="form-label">Estado</label>
+                <select class="form-select form-select-sm" id="filtro-estado">
+                  <option value="">Todos</option>
+                  <option value="En proceso">En proceso</option>
+                  <option value="Condicional">Condicional</option>
+                  <option value="Finalizado">Finalizado</option>
+                  <option value="Archivado">Archivado</option>
+                </select>
+              </div>
+              <div class="col-6 col-xl-2">
+                <label class="form-label">Aprobador</label>
+                <select class="form-select form-select-sm" id="filtro-aprobador">
+                  <option value="">Todos</option>
+                </select>
+              </div>
+              <div class="col-6 col-xl-2">
+                <label class="form-label">Buscar DNI / Nombre</label>
+                <div class="input-group input-group-sm">
+                  <input type="text" id="filtro-busqueda" class="form-control" placeholder="DNI o nombre">
+                  <span class="input-group-text">
+                    <i class="bi bi-search"></i>
+                  </span>
+                </div>
+              </div>
+            </div>
+
+            <div class="table-responsive">
+              <table class="table table-sm table-hover align-middle">
+                <thead>
+                  <tr>
+                    <th>ID</th>
+                    <th>Nombre</th>
+                    <th>DNI</th>
+                    <th>Tipo</th>
+                    <th>Género</th>
+                    <th>Escalafón</th>
+                    <th>Zona</th>
+                    <th>Estado</th>
+                    <th>Aprobador</th>
+                    <th>Última act.</th>
+                    <th class="text-end">Acciones</th>
+                  </tr>
+                </thead>
+                <tbody id="tabla-tramites"></tbody>
+              </table>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- USUARIOS A CARGO -->
+      <section id="section-usuarios" class="main-section">
+        <div class="card card-soft mb-3">
+          <div class="card-header d-flex justify-content-between align-items-center">
+            <strong>Usuarios Aprobadores a Cargo</strong>
+            <span class="small text-muted">Supervisión, movimientos y bloqueos. Tipo asignado por Jefe (Cadetes / Agentes / Ambos).</span>
+          </div>
+          <div class="card-body">
+            <div class="table-responsive mb-3">
+              <table class="table table-sm table-hover align-middle">
+                <thead>
+                  <tr>
+                    <th>Aprobador</th>
+                    <th>Zona</th>
+                    <th>Tipo habilitado</th>
+                    <th>Trámites asignados</th>
+                    <th>Finalizados</th>
+                    <th>Condicionales</th>
+                    <th>Archivados</th>
+                    <th>Bloqueado</th>
+                    <th class="text-end">Acciones</th>
+                  </tr>
+                </thead>
+                <tbody id="tabla-usuarios"></tbody>
+              </table>
+            </div>
+            <div class="alert alert-info">
+              <i class="bi bi-info-circle"></i>
+              El tipo de trámites habilitados (Cadetes, Agentes o Ambos) es definido por el
+              <strong>Jefe</strong>. El Oficial solo administra los trámites dentro de esa configuración.
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- MENSAJES -->
+      <section id="section-mensajes" class="main-section">
+        <div class="card card-soft mb-3">
+          <div class="card-header d-flex justify-content-between align-items-center">
+            <strong>Mensajes Internos a Aprobadores</strong>
+            <button class="btn btn-sm btn-outline-primary" id="btn-mensaje-grupal">
+              <i class="bi bi-megaphone"></i> Enviar mensaje grupal
+            </button>
+          </div>
+          <div class="card-body">
+            <div class="chat-container">
+              <div class="chat-sidebar">
+                <div class="mb-2">
+                  <input type="text" class="form-control form-control-sm" id="buscar-aprobador-chat" placeholder="Buscar aprobador...">
+                </div>
+                <div class="list-group list-group-flush" id="lista-aprobadores-chat"></div>
+              </div>
+              <div class="chat-main">
+                <div class="border-bottom pb-1 mb-2 d-flex justify-content-between align-items-center">
+                  <div>
+                    <div class="fw-semibold" style="font-size:0.9rem;" id="titulo-chat">Seleccione un aprobador</div>
+                    <div class="small text-muted">Mensajes personales del Oficial</div>
+                  </div>
+                  <span class="badge rounded-pill text-bg-light border">
+                    <i class="bi bi-shield-check"></i> Oficial
+                  </span>
+                </div>
+                <div class="chat-message-list" id="lista-mensajes"></div>
+                <form id="form-enviar-mensaje">
+                  <div class="mb-1">
+                    <label class="form-label mb-1" style="font-size:0.8rem;">Asunto del mensaje</label>
+                    <input type="text" class="form-control form-control-sm" id="mensaje-asunto" placeholder="Ej.: Revisión de trámites condicionales">
+                  </div>
+                  <div class="mb-2">
+                    <label class="form-label mb-1" style="font-size:0.8rem;">Mensaje</label>
+                    <textarea rows="3" class="form-control form-control-sm" id="mensaje-texto" placeholder="Escriba el mensaje al aprobador seleccionado..." ></textarea>
+                  </div>
+                  <div class="d-flex justify-content-end">
+                    <button type="submit" class="btn btn-sm btn-primary">
+                      <i class="bi bi-send"></i> Enviar mensaje
+                    </button>
+                  </div>
+                </form>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- ESTADÍSTICAS -->
+      <section id="section-estadisticas" class="main-section">
+        <div class="card card-soft mb-3">
+          <div class="card-header d-flex justify-content-between align-items-center">
+            <strong>Estadísticas por Aprobador</strong>
+            <div class="d-flex align-items-center gap-2">
+              <select class="form-select form-select-sm" id="filtro-periodo-est">
+                <option value="7">Últimos 7 días</option>
+                <option value="30" selected>Últimos 30 días</option>
+                <option value="90">Últimos 90 días</option>
+              </select>
+              <select class="form-select form-select-sm" id="filtro-aprobador-est">
+                <option value="">Todos los aprobadores</option>
+              </select>
+            </div>
+          </div>
+          <div class="card-body">
+            <div class="row g-3 mb-3">
+              <div class="col-6 col-lg-3">
+                <div class="metric-label">Trámites asignados</div>
+                <div class="metric-value text-primary" id="est-asignados">0</div>
+                <div class="small text-muted">En el período seleccionado</div>
+              </div>
+              <div class="col-6 col-lg-3">
+                <div class="metric-label">Finalizados</div>
+                <div class="metric-value text-success" id="est-finalizados">0</div>
+                <div class="small text-muted">Cerrados correctamente</div>
+              </div>
+              <div class="col-6 col-lg-3">
+                <div class="metric-label">Condicionales</div>
+                <div class="metric-value text-warning" id="est-condicionales">0</div>
+                <div class="small text-muted">Pendientes de subsanar</div>
+              </div>
+              <div class="col-6 col-lg-3">
+                <div class="metric-label">Archivados</div>
+                <div class="metric-value text-secondary" id="est-archivados">0</div>
+                <div class="small text-muted">Trámites cerrados/descartados</div>
+              </div>
+            </div>
+            <div class="row g-3">
+              <div class="col-12 col-lg-7">
+                <div class="small-label mb-1">Trámites por aprobador y estado</div>
+                <canvas id="chartEstadisticasBarras" height="160"></canvas>
+              </div>
+              <div class="col-12 col-lg-5">
+                <div class="small-label mb-1">Distribución por estado</div>
+                <canvas id="chartEstadisticasTorta" height="160"></canvas>
+              </div>
+            </div>
+            <div class="alert alert-secondary mt-3">
+              <i class="bi bi-clipboard-data"></i>
+              Desde este módulo, el Oficial visualiza la estadística de los trámites de cada personal,
+              distinguiendo los <strong>cerrados</strong>, los <strong>condicionales</strong> y los
+              <strong>archivados</strong>, pudiendo usar esta información para auditorías y redistribución de carga.
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- CALENDARIO -->
+      <section id="section-calendario" class="main-section">
+        <div class="calendar-wrapper mb-3">
+          <div class="d-flex justify-content-between align-items-center mb-2">
+            <div>
+              <div class="small-label">Calendario de Vacaciones</div>
+              <div class="fw-semibold">Oficial y Aprobadores a cargo</div>
+            </div>
+            <div class="calendar-legend">
+              <span><span class="legend-dot" style="background:#0d6efd;"></span> Aprobador</span>
+              <span><span class="legend-dot" style="background:#6610f2;"></span> Oficial titular</span>
+              <span><span class="legend-dot" style="background:#198754;"></span> Oficial suplente</span>
+            </div>
+          </div>
+          <div id="calendar"></div>
+        </div>
+      </section>
+
+      <!-- SUPLENCIAS -->
+      <section id="section-suplencias" class="main-section">
+        <div class="row g-3">
+          <div class="col-12 col-xl-5">
+            <div class="card card-soft h-100">
+              <div class="card-header">
+                <strong>Alta de Suplencia</strong>
+              </div>
+              <div class="card-body">
+                <form id="form-suplencia">
+                  <div class="mb-2">
+                    <label class="form-label">Oficial titular (usted)</label>
+                    <input type="text" class="form-control form-control-sm" value="Oficial Carla Denise Acevedo" disabled>
+                  </div>
+                  <div class="mb-2">
+                    <label class="form-label">Oficial suplente</label>
+                    <select class="form-select form-select-sm" id="suplente-oficial">
+                      <option value="">Seleccione un Oficial</option>
+                      <option value="Oficial Suplente Pérez">Oficial Suplente Pérez</option>
+                      <option value="Oficial Suplente López">Oficial Suplente López</option>
+                    </select>
+                  </div>
+                  <div class="row g-2 mb-2">
+                    <div class="col-6">
+                      <label class="form-label">Desde</label>
+                      <input type="date" class="form-control form-control-sm" id="suplencia-desde">
+                    </div>
+                    <div class="col-6">
+                      <label class="form-label">Hasta</label>
+                      <input type="date" class="form-control form-control-sm" id="suplencia-hasta">
+                    </div>
+                  </div>
+                  <div class="mb-2">
+                    <label class="form-label">Motivo de licencia</label>
+                    <select class="form-select form-select-sm mb-1" id="suplencia-motivo">
+                      <option value="Vacaciones">Vacaciones</option>
+                      <option value="Licencia médica">Licencia médica</option>
+                      <option value="Comisión de servicio">Comisión de servicio</option>
+                      <option value="Otra licencia">Otra licencia</option>
+                    </select>
+                    <textarea class="form-control form-control-sm" rows="2" id="suplencia-detalle" placeholder="Detalle adicional (opcional)..."></textarea>
+                  </div>
+                  <div class="alert alert-warning small">
+                    <i class="bi bi-exclamation-triangle"></i>
+                    Durante el período de suplencia, el Oficial suplente tendrá acceso completo a la Mesa
+                    de Aprobadores del Oficial titular. Todas las acciones quedarán auditadas como
+                    “Suplente actuando en nombre de Oficial titular”.
+                  </div>
+                  <div class="d-flex justify-content-end">
+                    <button class="btn btn-sm btn-primary" type="submit">
+                      <i class="bi bi-arrow-repeat"></i> Registrar suplencia
+                    </button>
+                  </div>
+                </form>
+              </div>
+            </div>
+          </div>
+
+          <div class="col-12 col-xl-7">
+            <div class="card card-soft h-100">
+              <div class="card-header d-flex justify-content-between align-items-center">
+                <strong>Historial de Suplencias</strong>
+                <span class="small text-muted">Oficial titular y suplente</span>
+              </div>
+              <div class="card-body">
+                <div class="table-responsive mb-2">
+                  <table class="table table-sm align-middle">
+                    <thead>
+                      <tr>
+                        <th>Oficial titular</th>
+                        <th>Oficial suplente</th>
+                        <th>Desde</th>
+                        <th>Hasta</th>
+                        <th>Motivo</th>
+                        <th>Estado</th>
+                      </tr>
+                    </thead>
+                    <tbody id="tabla-suplencias"></tbody>
+                  </table>
+                </div>
+                <div class="alert alert-secondary small mb-0">
+                  <i class="bi bi-info-circle"></i>
+                  Desde este módulo el Oficial puede ver quién actuó como suplente de quién,
+                  en qué períodos y bajo qué motivos, manteniendo la trazabilidad de la continuidad
+                  operativa de la Mesa de Aprobadores.
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+    </div><!-- content -->
+  </div><!-- row -->
+</div><!-- container -->
+
+<!-- MODALES -->
+<div class="modal fade" id="modalDetalleTramite" tabindex="-1" aria-hidden="true">
+  <div class="modal-dialog modal-dialog-centered modal-lg">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title">Detalle del trámite</h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Cerrar"></button>
+      </div>
+      <div class="modal-body" id="detalle-tramite-body"></div>
+      <div class="modal-footer">
+        <button class="btn btn-secondary btn-sm" data-bs-dismiss="modal">Cerrar</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="modal fade" id="modalReasignar" tabindex="-1" aria-hidden="true">
+  <div class="modal-dialog modal-dialog-centered modal-sm">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title">Reasignar trámite</h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Cerrar"></button>
+      </div>
+      <div class="modal-body">
+        <form id="form-reasignar">
+          <input type="hidden" id="reasignar-tramite-id">
+          <div class="mb-2">
+            <label class="form-label">Nuevo aprobador (compatible)</label>
+            <select class="form-select form-select-sm" id="reasignar-aprobador"></select>
+            <div class="small text-muted mt-1">
+              Solo se muestran aprobadores habilitados por el Jefe para <strong>Cadetes / Agentes / Ambos</strong>,
+              compatibles con el tipo de aspirante del trámite.
+            </div>
+          </div>
+          <button type="submit" class="btn btn-sm btn-primary">Guardar cambios</button>
+        </form>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="modal fade" id="modalEstado" tabindex="-1" aria-hidden="true">
+  <div class="modal-dialog modal-dialog-centered modal-sm">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title">Cambiar estado</h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Cerrar"></button>
+      </div>
+      <div class="modal-body">
+        <form id="form-estado">
+          <input type="hidden" id="estado-tramite-id">
+          <div class="mb-2">
+            <label class="form-label">Nuevo estado</label>
+            <select class="form-select form-select-sm" id="nuevo-estado">
+              <option value="En proceso">En proceso</option>
+              <option value="Condicional">Condicional</option>
+              <option value="Finalizado">Finalizado</option>
+              <option value="Archivado">Archivado</option>
+            </select>
+          </div>
+          <button type="submit" class="btn btn-sm btn-primary">Actualizar</button>
+        </form>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="modal fade" id="modalMovimientos" tabindex="-1" aria-hidden="true">
+  <div class="modal-dialog modal-dialog-centered modal-lg">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title" id="movimientos-titulo">Movimientos del aprobador</h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Cerrar"></button>
+      </div>
+      <div class="modal-body">
+        <table class="table table-sm">
+          <thead>
+            <tr>
+              <th>Trámite</th>
+              <th>Estado</th>
+              <th>Última act.</th>
+            </tr>
+          </thead>
+          <tbody id="tabla-movimientos"></tbody>
+        </table>
+      </div>
+      <div class="modal-footer">
+        <button class="btn btn-secondary btn-sm" data-bs-dismiss="modal">Cerrar</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- SCRIPTS -->
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/fullcalendar@6.1.14/main.min.js"></script>
+
+<script>
+  // Datos simulados
+  const aprobadores = [
+    { id: 'ap1', nombre: 'Aprobador 1', zona: 'CABA', bloqueado: false, tipo: 'Cadetes' },
+    { id: 'ap2', nombre: 'Aprobador 2', zona: 'AMBA Sur', bloqueado: false, tipo: 'Agentes' },
+    { id: 'ap3', nombre: 'Aprobador 3', zona: 'Interior', bloqueado: false, tipo: 'Ambos' }
+  ];
+
+  let tramites = [
+    {
+      id: 'TR-00125', nombre: 'Gómez, Juan', dni: '40123456', tipo: 'Cadete', genero: 'Masculino',
+      escalafon: 'Seguridad', zona: 'CABA', estado: 'En proceso', aprobadorId: 'ap1',
+      ultimaActualizacion: '2025-12-03 10:21'
+    },
+    {
+      id: 'TR-00126', nombre: 'Pérez, Ana', dni: '41987654', tipo: 'Agente', genero: 'Femenino',
+      escalafon: 'Comunicaciones', zona: 'AMBA Sur', estado: 'Condicional', aprobadorId: 'ap2',
+      ultimaActualizacion: '2025-12-03 09:10'
+    },
+    {
+      id: 'TR-00127', nombre: 'López, Carla', dni: '39555123', tipo: 'Cadete', genero: 'Femenino',
+      escalafon: 'Bomberos', zona: 'Interior', estado: 'Finalizado', aprobadorId: 'ap3',
+      ultimaActualizacion: '2025-12-02 16:33'
+    },
+    {
+      id: 'TR-00128', nombre: 'Martínez, Diego', dni: '42666777', tipo: 'Agente', genero: 'Masculino',
+      escalafon: 'Ciberseguridad', zona: 'AMBA Noroeste', estado: 'Archivado', aprobadorId: 'ap1',
+      ultimaActualizacion: '2025-12-01 11:50'
+    },
+    {
+      id: 'TR-00129', nombre: 'Rodríguez, María', dni: '40777888', tipo: 'Cadete', genero: 'Femenino',
+      escalafon: 'Seguridad', zona: 'CABA', estado: 'En proceso', aprobadorId: 'ap1',
+      ultimaActualizacion: '2025-12-03 11:10'
+    }
+  ];
+
+  const mensajesPorAprobador = {
+    ap1: [
+      { autor: 'aprobador', fecha: '2025-12-02 17:20', texto: 'Oficial, ya finalicé los condicionales de AMBA Sur.' },
+      { autor: 'oficial', fecha: '2025-12-02 17:32', texto: 'Perfecto, te reasigno 5 trámites de CABA que están atrasados.' },
+      { autor: 'aprobador', fecha: '2025-12-03 08:10', texto: '¿Puede revisar un caso condicional de un cadete? Tengo dudas con la documentación.' }
+    ],
+    ap2: [
+      { autor: 'oficial', fecha: '2025-12-01 10:00', texto: 'Recordá priorizar los cadetes de interior.' }
+    ],
+    ap3: []
+  };
+
+  let suplencias = [
+    {
+      titular: 'Oficial Carla Denise Acevedo',
+      suplente: 'Oficial Suplente Pérez',
+      desde: '2026-01-15',
+      hasta: '2026-01-30',
+      motivo: 'Vacaciones',
+      estado: 'Programada'
+    },
+    {
+      titular: 'Oficial Gómez',
+      suplente: 'Oficial Carla Denise Acevedo',
+      desde: '2025-10-10',
+      hasta: '2025-10-20',
+      motivo: 'Comisión de servicio',
+      estado: 'Finalizada'
+    }
+  ];
+
+  let calendar; // FullCalendar instance
+  let chartEstadosDashboard;
+  let chartEstBarras;
+  let chartEstTorta;
+  let aprobadorChatActivo = null;
+
+  document.addEventListener('DOMContentLoaded', () => {
+    // Navegación lateral
+    document.querySelectorAll('.sidebar .nav-link').forEach(btn => {
+      btn.addEventListener('click', function () {
+        document.querySelectorAll('.sidebar .nav-link').forEach(b => b.classList.remove('active'));
+        this.classList.add('active');
+        const section = this.getAttribute('data-section');
+        document.querySelectorAll('.main-section').forEach(sec => sec.classList.remove('active'));
+        const activeSection = document.getElementById('section-' + section);
+        if (activeSection) activeSection.classList.add('active');
+        if (section === 'calendario' && calendar) {
+          calendar.render();
+        }
+      });
+    });
+
+    // Rellenar combos de aprobadores
+    const filtroAprobador = document.getElementById('filtro-aprobador');
+    const filtroAprobadorEst = document.getElementById('filtro-aprobador-est');
+    aprobadores.forEach(a => {
+      const opt1 = new Option(a.nombre, a.id);
+      const opt2 = new Option(a.nombre, a.id);
+      filtroAprobador.add(opt1);
+      filtroAprobadorEst.add(opt2);
+    });
+
+    // Listeners filtros de trámites
+    ['filtro-tipo','filtro-escalafon','filtro-zona','filtro-estado','filtro-aprobador','filtro-busqueda']
+      .forEach(id => {
+        document.getElementById(id).addEventListener('input', renderTramites);
+      });
+
+    // Listeners estadísticas
+    document.getElementById('filtro-periodo-est').addEventListener('change', renderEstadisticas);
+    document.getElementById('filtro-aprobador-est').addEventListener('change', renderEstadisticas);
+
+    // Tabla trámites: delegación eventos
+    document.getElementById('tabla-tramites').addEventListener('click', (e) => {
+      const btn = e.target.closest('button[data-action]');
+      if (!btn) return;
+      const id = btn.getAttribute('data-id');
+      const action = btn.getAttribute('data-action');
+      if (action === 'detalle') {
+        mostrarDetalleTramite(id);
+      } else if (action === 'reasignar') {
+        abrirModalReasignar(id);
+      } else if (action === 'estado') {
+        abrirModalEstado(id);
+      }
+    });
+
+    // Trámites modales
+    document.getElementById('form-reasignar').addEventListener('submit', (e) => {
+      e.preventDefault();
+      const id = document.getElementById('reasignar-tramite-id').value;
+      const nuevoAprobador = document.getElementById('reasignar-aprobador').value;
+      const t = tramites.find(t => t.id === id);
+      if (t && nuevoAprobador) {
+        t.aprobadorId = nuevoAprobador;
+        t.ultimaActualizacion = '2025-12-03 12:00';
+        renderTodo();
+        bootstrap.Modal.getInstance(document.getElementById('modalReasignar')).hide();
+      }
+    });
+
+    document.getElementById('form-estado').addEventListener('submit', (e) => {
+      e.preventDefault();
+      const id = document.getElementById('estado-tramite-id').value;
+      const nuevoEstado = document.getElementById('nuevo-estado').value;
+      const t = tramites.find(t => t.id === id);
+      if (t) {
+        t.estado = nuevoEstado;
+        t.ultimaActualizacion = '2025-12-03 12:10';
+        renderTodo();
+        bootstrap.Modal.getInstance(document.getElementById('modalEstado')).hide();
+      }
+    });
+
+    // Usuarios a cargo: delegación
+    document.getElementById('tabla-usuarios').addEventListener('click', (e) => {
+      const btn = e.target.closest('button[data-action]');
+      if (!btn) return;
+      const id = btn.getAttribute('data-id');
+      const action = btn.getAttribute('data-action');
+      const ap = aprobadores.find(a => a.id === id);
+      if (!ap) return;
+      if (action === 'bloquear') {
+        ap.bloqueado = !ap.bloqueado;
+        renderUsuarios();
+      } else if (action === 'movimientos') {
+        mostrarMovimientos(id);
+      }
+    });
+
+    // Chat
+    document.getElementById('buscar-aprobador-chat').addEventListener('input', renderListaChat);
+
+    document.getElementById('form-enviar-mensaje').addEventListener('submit', (e) => {
+      e.preventDefault();
+      if (!aprobadorChatActivo) {
+        alert('Seleccione un aprobador primero.');
+        return;
+      }
+      const asunto = document.getElementById('mensaje-asunto').value.trim();
+      const texto = document.getElementById('mensaje-texto').value.trim();
+      if (!texto) return;
+      const ahora = '2025-12-03 12:30';
+      mensajesPorAprobador[aprobadorChatActivo] = mensajesPorAprobador[aprobadorChatActivo] || [];
+      mensajesPorAprobador[aprobadorChatActivo].push({
+        autor: 'oficial',
+        fecha: ahora,
+        texto: asunto ? asunto + ' – ' + texto : texto
+      });
+      document.getElementById('mensaje-asunto').value = '';
+      document.getElementById('mensaje-texto').value = '';
+      renderChatMensajes();
+    });
+
+    document.getElementById('btn-mensaje-grupal').addEventListener('click', () => {
+      alert('Simulación: aquí se podría abrir un modal para enviar mensaje grupal a todos los aprobadores.');
+    });
+
+    // Suplencias
+    document.getElementById('form-suplencia').addEventListener('submit', (e) => {
+      e.preventDefault();
+      const suplente = document.getElementById('suplente-oficial').value;
+      const desde = document.getElementById('suplencia-desde').value;
+      const hasta = document.getElementById('suplencia-hasta').value;
+      const motivo = document.getElementById('suplencia-motivo').value;
+      if (!suplente || !desde || !hasta) {
+        alert('Complete suplente y rango de fechas.');
+        return;
+      }
+      suplencias.push({
+        titular: 'Oficial Carla Denise Acevedo',
+        suplente,
+        desde,
+        hasta,
+        motivo,
+        estado: 'Programada'
+      });
+      renderSuplencias();
+      agregarEventoSuplenciaAlCalendario(suplencias[suplencias.length - 1]);
+      document.getElementById('form-suplencia').reset();
+      document.getElementById('suplencia-motivo').value = 'Vacaciones';
+    });
+
+    // FullCalendar
+    const calendarEl = document.getElementById('calendar');
+    calendar = new FullCalendar.Calendar(calendarEl, {
+      initialView: 'dayGridMonth',
+      height: 550,
+      locale: 'es',
+      firstDay: 1,
+      headerToolbar: {
+        left: 'prev,next today',
+        center: 'title',
+        right: 'dayGridMonth,dayGridWeek'
+      },
+      events: []
+    });
+    calendar.render();
+
+    const eventosVacaciones = [
+      {
+        title: 'Vacaciones Aprobador 2',
+        start: '2025-12-10',
+        end: '2025-12-21',
+        color: '#0d6efd'
+      },
+      {
+        title: 'Licencia médica Aprobador 3',
+        start: '2025-12-01',
+        end: '2025-12-06',
+        color: '#0d6efd'
+      },
+      {
+        title: 'Vacaciones Oficial Carla',
+        start: '2026-01-15',
+        end: '2026-01-31',
+        color: '#6610f2'
+      },
+      {
+        title: 'Suplencia Oficial Suplente Pérez',
+        start: '2026-01-15',
+        end: '2026-01-31',
+        color: '#198754'
+      }
+    ];
+    eventosVacaciones.forEach(ev => calendar.addEvent(ev));
+
+    // Charts
+    const ctxDash = document.getElementById('chartEstadosDashboard').getContext('2d');
+    chartEstadosDashboard = new Chart(ctxDash, {
+      type: 'bar',
+      data: {
+        labels: ['En proceso', 'Condicional', 'Finalizado', 'Archivado'],
+        datasets: [{
+          label: 'Cantidad',
+          data: [0,0,0,0],
+          backgroundColor: '#0d6efd'
+        }]
+      },
+      options: {
+        responsive: true,
+        plugins: {
+          legend: { display: false }
+        },
+        scales: {
+          x: {
+            ticks: { color: '#495057' },
+            grid: { color: '#e9ecef' }
+          },
+          y: {
+            beginAtZero: true,
+            ticks: { color: '#495057', precision:0 },
+            grid: { color: '#e9ecef' }
+          }
+        }
+      }
+    });
+
+    const ctxBarras = document.getElementById('chartEstadisticasBarras').getContext('2d');
+    chartEstBarras = new Chart(ctxBarras, {
+      type: 'bar',
+      data: {
+        labels: [],
+        datasets: [
+          { label: 'Finalizados', data: [], stack: 'stack1', backgroundColor: '#198754' },
+          { label: 'Condicionales', data: [], stack: 'stack1', backgroundColor: '#ffc107' },
+          { label: 'Archivados', data: [], stack: 'stack1', backgroundColor: '#6c757d' }
+        ]
+      },
+      options: {
+        responsive: true,
+        plugins: { legend: { labels: { color: '#495057' } } },
+        scales: {
+          x: { stacked: true, ticks: { color: '#495057' }, grid: { color: '#e9ecef' } },
+          y: { stacked: true, beginAtZero: true, ticks: { color: '#495057', precision:0 }, grid: { color: '#e9ecef' } }
+        }
+      }
+    });
+
+    const ctxTorta = document.getElementById('chartEstadisticasTorta').getContext('2d');
+    chartEstTorta = new Chart(ctxTorta, {
+      type: 'doughnut',
+      data: {
+        labels: ['En proceso','Condicional','Finalizado','Archivado'],
+        datasets: [{
+          data: [0,0,0,0],
+          backgroundColor: ['#0d6efd','#ffc107','#198754','#6c757d']
+        }]
+      },
+      options: {
+        responsive: true,
+        plugins: {
+          legend: { labels: { color: '#495057' } }
+        }
+      }
+    });
+
+    // Chat: lista de aprobadores
+    renderListaChat();
+
+    // Render general
+    renderTodo();
+  });
+
+  function renderTodo() {
+    renderTramites();
+    renderDashboard();
+    renderUsuarios();
+    renderEstadisticas();
+    renderSuplencias();
+  }
+
+  function filtrarTramites() {
+    const tipo = document.getElementById('filtro-tipo').value;
+    const esc = document.getElementById('filtro-escalafon').value;
+    const zona = document.getElementById('filtro-zona').value;
+    const estado = document.getElementById('filtro-estado').value;
+    const aprobadorId = document.getElementById('filtro-aprobador').value;
+    const busq = document.getElementById('filtro-busqueda').value.trim().toLowerCase();
+
+    return tramites.filter(t => {
+      if (tipo && t.tipo !== tipo) return false;
+      if (esc && t.escalafon !== esc) return false;
+      if (zona && t.zona !== zona) return false;
+      if (estado && t.estado !== estado) return false;
+      if (aprobadorId && t.aprobadorId !== aprobadorId) return false;
+      if (busq) {
+        const texto = (t.dni + ' ' + t.nombre).toLowerCase();
+        if (!texto.includes(busq)) return false;
+      }
+      return true;
+    });
+  }
+
+  function renderTramites() {
+    const tbody = document.getElementById('tabla-tramites');
+    tbody.innerHTML = '';
+    const filtrados = filtrarTramites();
+    for (const t of filtrados) {
+      const ap = aprobadores.find(a => a.id === t.aprobadorId);
+      const tr = document.createElement('tr');
+      tr.innerHTML = `
+        <td>${t.id}</td>
+        <td>${t.nombre}</td>
+        <td>${t.dni}</td>
+        <td>${t.tipo}</td>
+        <td>${t.genero}</td>
+        <td>${renderEscalafonBadge(t.escalafon)}</td>
+        <td>${t.zona}</td>
+        <td>${renderEstadoBadge(t.estado)}</td>
+        <td>${ap ? ap.nombre : '-'}</td>
+        <td>${t.ultimaActualizacion}</td>
+        <td class="text-end">
+          <div class="btn-group btn-group-sm">
+            <button class="btn btn-outline-secondary" data-action="detalle" data-id="${t.id}" title="Ver detalle">
+              <i class="bi bi-eye"></i>
+            </button>
+            <button class="btn btn-outline-secondary" data-action="reasignar" data-id="${t.id}" title="Reasignar">
+              <i class="bi bi-arrow-left-right"></i>
+            </button>
+            <button class="btn btn-outline-secondary" data-action="estado" data-id="${t.id}" title="Cambiar estado">
+              <i class="bi bi-flag"></i>
+            </button>
+          </div>
+        </td>
+      `;
+      tbody.appendChild(tr);
+    }
+  }
+
+  function renderEscalafonBadge(escalafon) {
+    let cls = 'text-bg-secondary';
+    if (escalafon === 'Seguridad') cls = 'text-bg-primary';
+    else if (escalafon === 'Comunicaciones') cls = 'text-bg-warning text-dark';
+    else if (escalafon === 'Bomberos') cls = 'text-bg-danger';
+    else if (escalafon === 'Ciberseguridad') cls = 'text-bg-info text-dark';
+    return `<span class="badge ${cls}">${escalafon}</span>`;
+  }
+
+  function renderEstadoBadge(estado) {
+    let cls = 'text-bg-secondary';
+    if (estado === 'En proceso') cls = 'text-bg-primary';
+    else if (estado === 'Condicional') cls = 'text-bg-warning text-dark';
+    else if (estado === 'Finalizado') cls = 'text-bg-success';
+    else if (estado === 'Archivado') cls = 'text-bg-secondary';
+    return `<span class="badge-estado ${cls}">${estado}</span>`;
+  }
+
+  function renderDashboard() {
+    const counts = { 'En proceso':0, 'Condicional':0, 'Finalizado':0, 'Archivado':0 };
+    for (const t of tramites) {
+      if (counts[t.estado] !== undefined) counts[t.estado]++;
+    }
+    document.getElementById('dash-en-proceso').textContent = counts['En proceso'];
+    document.getElementById('dash-condicionales').textContent = counts['Condicional'];
+    document.getElementById('dash-finalizados').textContent = counts['Finalizado'];
+    document.getElementById('dash-archivados').textContent = counts['Archivado'];
+
+    // Resumen por tipo
+    const tipos = ['Cadete','Agente'];
+    const tbody = document.getElementById('tabla-resumen-tipo');
+    tbody.innerHTML = '';
+    tipos.forEach(tipo => {
+      const c = { 'En proceso':0, 'Condicional':0, 'Finalizado':0, 'Archivado':0 };
+      tramites.filter(t => t.tipo === tipo).forEach(t => c[t.estado]++);
+      const tr = document.createElement('tr');
+      tr.innerHTML = `
+        <td>${tipo}</td>
+        <td>${c['En proceso']}</td>
+        <td>${c['Condicional']}</td>
+        <td>${c['Finalizado']}</td>
+        <td>${c['Archivado']}</td>
+      `;
+      tbody.appendChild(tr);
+    });
+
+    chartEstadosDashboard.data.datasets[0].data = [
+      counts['En proceso'],
+      counts['Condicional'],
+      counts['Finalizado'],
+      counts['Archivado']
+    ];
+    chartEstadosDashboard.update();
+  }
+
+  function renderUsuarios() {
+    const tbody = document.getElementById('tabla-usuarios');
+    tbody.innerHTML = '';
+    for (const ap of aprobadores) {
+      const tAprob = tramites.filter(t => t.aprobadorId === ap.id);
+      const total = tAprob.length;
+      const finalizados = tAprob.filter(t => t.estado === 'Finalizado').length;
+      const cond = tAprob.filter(t => t.estado === 'Condicional').length;
+      const arch = tAprob.filter(t => t.estado === 'Archivado').length;
+      const tr = document.createElement('tr');
+      tr.innerHTML = `
+        <td>${ap.nombre}</td>
+        <td>${ap.zona}</td>
+        <td>${ap.tipo}</td>
+        <td>${total}</td>
+        <td>${finalizados}</td>
+        <td>${cond}</td>
+        <td>${arch}</td>
+        <td>${ap.bloqueado ? '<span class="badge text-bg-danger">Sí</span>' : '<span class="badge text-bg-success">No</span>'}</td>
+        <td class="text-end">
+          <div class="btn-group btn-group-sm">
+            <button class="btn btn-outline-secondary" data-action="movimientos" data-id="${ap.id}" title="Ver movimientos">
+              <i class="bi bi-list-check"></i>
+            </button>
+            <button class="btn btn-outline-secondary" data-action="bloquear" data-id="${ap.id}" title="Bloquear / desbloquear">
+              <i class="bi ${ap.bloqueado ? 'bi-unlock' : 'bi-lock'}"></i>
+            </button>
+          </div>
+        </td>
+      `;
+      tbody.appendChild(tr);
+    }
+  }
+
+  function mostrarDetalleTramite(id) {
+    const t = tramites.find(t => t.id === id);
+    if (!t) return;
+    const ap = aprobadores.find(a => a.id === t.aprobadorId);
+    const body = document.getElementById('detalle-tramite-body');
+    body.innerHTML = `
+      <div class="row">
+        <div class="col-md-6">
+          <h6>Datos personales</h6>
+          <p class="mb-1"><strong>Nombre:</strong> ${t.nombre}</p>
+          <p class="mb-1"><strong>DNI:</strong> ${t.dni}</p>
+          <p class="mb-1"><strong>Género:</strong> ${t.genero}</p>
+          <p class="mb-1"><strong>Tipo de aspirante:</strong> ${t.tipo}</p>
+          <p class="mb-1"><strong>Zona:</strong> ${t.zona}</p>
+        </div>
+        <div class="col-md-6">
+          <h6>Información de trámite</h6>
+          <p class="mb-1"><strong>Escalafón:</strong> ${t.escalafon}</p>
+          <p class="mb-1"><strong>Estado:</strong> ${t.estado}</p>
+          <p class="mb-1"><strong>Aprobador asignado:</strong> ${ap ? ap.nombre : '-'}</p>
+          <p class="mb-1"><strong>Tipo habilitado del aprobador:</strong> ${ap ? ap.tipo : '-'}</p>
+          <p class="mb-1"><strong>Última actualización:</strong> ${t.ultimaActualizacion}</p>
+        </div>
+      </div>
+      <hr>
+      <p class="small text-muted mb-0">En una implementación real, aquí se mostrarían datos familiares, domicilios, documentación cargada y mapa de Google Maps con ubicación del aspirante.</p>
+    `;
+    new bootstrap.Modal(document.getElementById('modalDetalleTramite')).show();
+  }
+
+  function abrirModalReasignar(id) {
+    document.getElementById('reasignar-tramite-id').value = id;
+    const select = document.getElementById('reasignar-aprobador');
+    select.innerHTML = '';
+    const t = tramites.find(tr => tr.id === id);
+    if (!t) return;
+    // Solo aprobadores compatibles según tipo definido por el Jefe:
+    // Cadetes -> tipo = 'Cadetes' o 'Ambos'
+    // Agentes -> tipo = 'Agentes' o 'Ambos'
+    aprobadores.forEach(a => {
+      if (a.tipo === 'Ambos' ||
+         (a.tipo === 'Cadetes' && t.tipo === 'Cadete') ||
+         (a.tipo === 'Agentes' && t.tipo === 'Agente')) {
+        select.add(new Option(`${a.nombre} (${a.tipo})`, a.id));
+      }
+    });
+    new bootstrap.Modal(document.getElementById('modalReasignar')).show();
+  }
+
+  function abrirModalEstado(id) {
+    document.getElementById('estado-tramite-id').value = id;
+    const t = tramites.find(t => t.id === id);
+    document.getElementById('nuevo-estado').value = t ? t.estado : 'En proceso';
+    new bootstrap.Modal(document.getElementById('modalEstado')).show();
+  }
+
+  function mostrarMovimientos(apId) {
+    const ap = aprobadores.find(a => a.id === apId);
+    const tbody = document.getElementById('tabla-movimientos');
+    tbody.innerHTML = '';
+    document.getElementById('movimientos-titulo').textContent = 'Movimientos de ' + (ap ? ap.nombre : '');
+    const tAprob = tramites.filter(t => t.aprobadorId === apId);
+    for (const t of tAprob) {
+      const tr = document.createElement('tr');
+      tr.innerHTML = `
+        <td>${t.id} – ${t.nombre}</td>
+        <td>${renderEstadoBadge(t.estado)}</td>
+        <td>${t.ultimaActualizacion}</td>
+      `;
+      tbody.appendChild(tr);
+    }
+    new bootstrap.Modal(document.getElementById('modalMovimientos')).show();
+  }
+
+  function renderListaChat() {
+    const cont = document.getElementById('lista-aprobadores-chat');
+    const filtro = document.getElementById('buscar-aprobador-chat').value.toLowerCase();
+    cont.innerHTML = '';
+    aprobadores.forEach(a => {
+      if (filtro && !a.nombre.toLowerCase().includes(filtro)) return;
+      const mensajes = mensajesPorAprobador[a.id] || [];
+      const noLeidos = mensajes.filter(m => m.autor === 'aprobador').length;
+      const btn = document.createElement('button');
+      btn.type = 'button';
+      btn.className = 'list-group-item list-group-item-action py-2';
+      if (a.id === aprobadorChatActivo) btn.classList.add('active');
+      btn.innerHTML = `
+        <div class="d-flex justify-content-between align-items-center">
+          <div>
+            <div class="fw-semibold" style="font-size:0.9rem;">${a.nombre}</div>
+            <div class="small text-muted">${a.zona} · Habilitado: ${a.tipo}</div>
+          </div>
+          ${noLeidos ? `<span class="badge rounded-pill text-bg-primary">${noLeidos}</span>` : ''}
+        </div>
+      `;
+      btn.addEventListener('click', () => {
+        aprobadorChatActivo = a.id;
+        document.getElementById('titulo-chat').textContent = 'Conversación con ' + a.nombre;
+        renderListaChat();
+        renderChatMensajes();
+      });
+      cont.appendChild(btn);
+    });
+    if (!aprobadorChatActivo && aprobadores.length) {
+      aprobadorChatActivo = aprobadores[0].id;
+      document.getElementById('titulo-chat').textContent = 'Conversación con ' + aprobadores[0].nombre;
+      renderListaChat();
+      renderChatMensajes();
+    }
+  }
+
+  function renderChatMensajes() {
+    const cont = document.getElementById('lista-mensajes');
+    cont.innerHTML = '';
+    if (!aprobadorChatActivo) return;
+    const mensajes = mensajesPorAprobador[aprobadorChatActivo] || [];
+    mensajes.forEach(m => {
+      const div = document.createElement('div');
+      div.className = 'chat-message ' + (m.autor === 'oficial' ? 'me' : 'other');
+      div.innerHTML = `
+        <div class="small text-muted mb-1">${m.autor === 'oficial' ? 'Usted (Oficial)' : 'Aprobador'} · ${m.fecha}</div>
+        <div>${m.texto}</div>
+      `;
+      cont.appendChild(div);
+    });
+    cont.scrollTop = cont.scrollHeight;
+  }
+
+  function renderEstadisticas() {
+    const apId = document.getElementById('filtro-aprobador-est').value;
+    const periodo = parseInt(document.getElementById('filtro-periodo-est').value, 10);
+    // En este mock, ignoramos "periodo" y usamos todos los trámites
+
+    let filtrados = tramites;
+    if (apId) filtrados = filtrados.filter(t => t.aprobadorId === apId);
+
+    const asignados = filtrados.length;
+    const finalizados = filtrados.filter(t => t.estado === 'Finalizado').length;
+    const cond = filtrados.filter(t => t.estado === 'Condicional').length;
+    const arch = filtrados.filter(t => t.estado === 'Archivado').length;
+    const enProc = filtrados.filter(t => t.estado === 'En proceso').length;
+
+    document.getElementById('est-asignados').textContent = asignados;
+    document.getElementById('est-finalizados').textContent = finalizados;
+    document.getElementById('est-condicionales').textContent = cond;
+    document.getElementById('est-archivados').textContent = arch;
+
+    const labels = [];
+    const dataFin = [];
+    const dataCond = [];
+    const dataArch = [];
+
+    aprobadores.forEach(a => {
+      let ts = tramites.filter(t => t.aprobadorId === a.id);
+      if (apId && a.id !== apId) return;
+      labels.push(a.nombre);
+      dataFin.push(ts.filter(t => t.estado === 'Finalizado').length);
+      dataCond.push(ts.filter(t => t.estado === 'Condicional').length);
+      dataArch.push(ts.filter(t => t.estado === 'Archivado').length);
+    });
+
+    chartEstBarras.data.labels = labels;
+    chartEstBarras.data.datasets[0].data = dataFin;
+    chartEstBarras.data.datasets[1].data = dataCond;
+    chartEstBarras.data.datasets[2].data = dataArch;
+    chartEstBarras.update();
+
+    chartEstTorta.data.datasets[0].data = [enProc, cond, finalizados, arch];
+    chartEstTorta.update();
+  }
+
+  function renderSuplencias() {
+    const tbody = document.getElementById('tabla-suplencias');
+    tbody.innerHTML = '';
+    suplencias.forEach(s => {
+      const tr = document.createElement('tr');
+      tr.innerHTML = `
+        <td>${s.titular}</td>
+        <td>${s.suplente}</td>
+        <td>${s.desde}</td>
+        <td>${s.hasta}</td>
+        <td>${s.motivo}</td>
+        <td><span class="badge rounded-pill ${s.estado === 'Finalizada' ? 'text-bg-secondary' : 'text-bg-info text-dark'}">${s.estado}</span></td>
+      `;
+      tbody.appendChild(tr);
+    });
+  }
+
+  function agregarEventoSuplenciaAlCalendario(s) {
+    if (!calendar) return;
+    calendar.addEvent({
+      title: 'Suplencia ' + s.suplente,
+      start: s.desde,
+      end: s.hasta ? sumarDia(s.hasta) : undefined,
+      color: '#198754'
+    });
+  }
+
+  function sumarDia(fechaStr) {
+    const d = new Date(fechaStr);
+    d.setDate(d.getDate() + 1);
+    return d.toISOString().substring(0,10);
+  }
+</script>
+
+</body>
+</html>

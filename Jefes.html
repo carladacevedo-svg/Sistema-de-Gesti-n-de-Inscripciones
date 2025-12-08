@@ -1,0 +1,634 @@
+<!doctype html>
+<html lang="es">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>SGI – Jefes · Trámites · Aprobadores · Estadísticas</title>
+  <!-- Bootstrap 5 -->
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet" />
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.css" rel="stylesheet" />
+  <!-- Chart.js -->
+  <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
+  <style>
+    :root{
+      --pfa-azul-oscuro:#002147; --pfa-azul:#004A99; --pfa-dorado:#D4AF37; --pfa-claro:#f4f6f9;
+      --seg:#0d6efd; --com:#f59e0b; --bom:#ef4444;
+    }
+    body{background:var(--pfa-claro);font-family:"Segoe UI","Roboto",system-ui,-apple-system,sans-serif}
+    .navbar{background:var(--pfa-azul-oscuro)}
+    .brand-title{display:flex;align-items:center;gap:.75rem;color:#fff}
+    .brand-title img{height:48px}
+    .nav-link{color:#cfe3ff}
+    .nav-link.active{color:#fff;font-weight:700;border-bottom:2px solid var(--pfa-dorado)}
+    .card{border:none;border-radius:16px;box-shadow:0 6px 18px rgba(0,0,0,.08)}
+    .card-header{background:linear-gradient(90deg,var(--pfa-azul),#0a66c2);color:#fff;font-weight:700;border-top-left-radius:16px;border-top-right-radius:16px}
+    .avatar{width:88px;height:88px;border-radius:50%;object-fit:cover;border:3px solid var(--pfa-dorado);box-shadow:0 2px 6px rgba(0,0,0,.15)}
+    .role-badge{border:1px solid var(--pfa-dorado);color:var(--pfa-azul-oscuro);background:#fff7df;font-weight:600}
+    .mini-title{font-size:.85rem;text-transform:uppercase;letter-spacing:.06em;color:#6b7280}
+    .divider{height:1px;background:linear-gradient(90deg,transparent,#dfe3ea,transparent)}
+    .badge-level{background:#e9efff;color:#0a2a6b;border:1px solid #b9c9ff}
+    .stat-chip{background:#fff;border:1px dashed #c7d2fe;border-radius:999px;padding:.35rem .6rem;font-size:.8rem}
+    .toolbar{position:sticky;top:.75rem;z-index:10}
+    .filter-pill{border:1px solid #d0d7de;background:#fff;border-radius:999px;padding:.35rem .7rem;cursor:pointer}
+    .filter-pill.active{background:#e7f1ff;border-color:#99c2ff}
+    .table thead th{white-space:nowrap}
+    .badge-esc.seg{background:var(--seg)}
+    .badge-esc.com{background:var(--com)}
+    .badge-esc.bom{background:var(--bom)}
+    .kanban-col{min-width:320px}
+    .kanban-card{background:#fff;border:1px solid #e5e7eb;border-radius:12px;padding:.75rem;margin-bottom:.75rem}
+    .chip{border-radius:999px;border:1px solid #e5e7eb;padding:.2rem .5rem}
+    .offcanvas{--bs-offcanvas-width:380px}
+  </style>
+</head>
+<body>
+  <!-- NAV -->
+  <nav class="navbar navbar-expand-lg navbar-dark">
+    <div class="container-fluid px-3">
+      <a class="navbar-brand brand-title" href="#">
+        <img src="escudo_pfa.png" alt="Escudo PFA" onerror="this.style.display='none'" />
+        <span>SGI – Sistema de Gestión de Inscripciones</span>
+      </a>
+      <ul class="navbar-nav ms-auto me-3 gap-2">
+        <li class="nav-item"><a class="nav-link active" data-section="perfiles" href="#">Perfiles de Jefes</a></li>
+        <li class="nav-item"><a class="nav-link" data-section="tramites" href="#">Trámites</a></li>
+        <li class="nav-item"><a class="nav-link" data-section="aprobadores" href="#">Aprobadores</a></li>
+        <li class="nav-item"><a class="nav-link" data-section="estadisticas" href="#">Estadísticas</a></li>
+      </ul>
+      <button class="btn btn-outline-light btn-sm" data-bs-toggle="offcanvas" data-bs-target="#panelAyuda"><i class="bi bi-info-circle"></i> Ayuda</button>
+    </div>
+  </nav>
+
+  <!-- ======= SECCIÓN PERFILES (JEFES) ======= -->
+  <section id="section-perfiles" class="container my-3">
+    <div class="card p-3 toolbar mb-3">
+      <div class="row g-2 align-items-center">
+        <div class="col-12 col-lg-4">
+          <label class="mini-title mb-1">Buscar</label>
+          <div class="input-group">
+            <span class="input-group-text"><i class="bi bi-search"></i></span>
+            <input id="searchInput" type="text" class="form-control" placeholder="Nombre, cargo, sector o permiso…" />
+          </div>
+        </div>
+        <div class="col-6 col-lg-3">
+          <label class="mini-title mb-1">Filtrar por Sector</label>
+          <select id="sectorFilter" class="form-select">
+            <option value="">Todos</option>
+            <option>Div. Incorporaciones</option>
+            <option>Validación Documental</option>
+            <option>Gestión de Aprobadores</option>
+            <option>Soporte Técnico</option>
+          </select>
+        </div>
+        <div class="col-6 col-lg-3">
+          <label class="mini-title mb-1">Filtrar por Nivel</label>
+          <select id="nivelFilter" class="form-select">
+            <option value="">Todos</option>
+            <option value="1">Nivel 1</option>
+            <option value="2">Nivel 2</option>
+            <option value="3">Nivel 3</option>
+            <option value="4">Nivel 4</option>
+          </select>
+        </div>
+        <div class="col-12 col-lg-2 d-grid d-lg-flex gap-2">
+          <button id="resetBtn" class="btn btn-outline-secondary w-100 w-lg-auto"><i class="bi bi-arrow-counterclockwise"></i> Limpiar</button>
+          <button id="nuevoJefeBtn" class="btn btn-primary" style="background:var(--pfa-azul);border-color:var(--pfa-azul)"><i class="bi bi-person-plus"></i> Nuevo</button>
+        </div>
+      </div>
+      <div class="mt-3 d-flex flex-wrap gap-2" id="permisoChips">
+        <span class="mini-title me-1">Permisos rápidos:</span>
+        <span class="filter-pill" data-perm="validar_doc">Validar Documentación</span>
+        <span class="filter-pill" data-perm="aprobar_ingreso">Aprobar Ingreso</span>
+        <span class="filter-pill" data-perm="asignar_aspirantes">Asignar Aspirantes</span>
+        <span class="filter-pill" data-perm="ver_estadisticas">Ver Estadísticas</span>
+        <span class="filter-pill" data-perm="gestionar_usuarios">Gestionar Usuarios</span>
+        <span class="filter-pill" data-perm="descargar_documentacion">Descargar Documentación</span>
+      </div>
+    </div>
+
+    <div id="gridJefes" class="row g-4"></div>
+  </section>
+
+  <!-- ======= SECCIÓN TRÁMITES ======= -->
+  <section id="section-tramites" class="container my-4 d-none">
+    <div class="card p-3 mb-3">
+      <div class="row g-2 align-items-end">
+        <div class="col-md-3">
+          <label class="mini-title mb-1">Buscar trámite</label>
+          <div class="input-group">
+            <span class="input-group-text"><i class="bi bi-search"></i></span>
+            <input id="buscarTramite" type="text" class="form-control" placeholder="ID, Aspirante, DNI…">
+          </div>
+        </div>
+        <div class="col-md-2">
+          <label class="mini-title mb-1">Escalafón</label>
+          <select id="filEscalafon" class="form-select">
+            <option value="">Todos</option>
+            <option value="SEG">Seguridad</option>
+            <option value="COM">Comunicaciones</option>
+            <option value="BOM">Bomberos</option>
+          </select>
+        </div>
+        <div class="col-md-2">
+          <label class="mini-title mb-1">Estado</label>
+          <select id="filEstado" class="form-select">
+            <option value="">Todos</option>
+            <option>Ingreso de Datos</option>
+            <option>Validación</option>
+            <option>Aprobación</option>
+            <option>Archivado</option>
+          </select>
+        </div>
+        <div class="col-md-3">
+          <label class="mini-title mb-1">Jefe</label>
+          <select id="filJefe" class="form-select"></select>
+        </div>
+        <div class="col-md-2 d-grid d-md-flex gap-2">
+          <button id="btnVistaTabla" class="btn btn-outline-primary"><i class="bi bi-table"></i> Tabla</button>
+          <button id="btnVistaKanban" class="btn btn-outline-secondary"><i class="bi bi-columns-gap"></i> Kanban</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Tabla de trámites -->
+    <div id="vistaTabla" class="card p-3">
+      <div class="table-responsive">
+        <table class="table table-hover align-middle" id="tablaTramites">
+          <thead>
+            <tr>
+              <th>ID</th><th>Aspirante</th><th>DNI</th><th>Escalafón</th><th>Estado</th><th>Jefe</th><th>Aprobador</th><th>Ingreso</th><th>SLA (d)</th><th></th>
+            </tr>
+          </thead>
+          <tbody></tbody>
+        </table>
+      </div>
+    </div>
+
+    <!-- Kanban -->
+    <div id="vistaKanban" class="d-none">
+      <div class="row g-3 flex-nowrap overflow-auto">
+        <div class="col kanban-col">
+          <h6 class="mini-title">Ingreso de Datos</h6>
+          <div id="colIngreso"></div>
+        </div>
+        <div class="col kanban-col">
+          <h6 class="mini-title">Validación</h6>
+          <div id="colValidacion"></div>
+        </div>
+        <div class="col kanban-col">
+          <h6 class="mini-title">Aprobación</h6>
+          <div id="colAprobacion"></div>
+        </div>
+        <div class="col kanban-col">
+          <h6 class="mini-title">Archivado</h6>
+          <div id="colArchivado"></div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ======= SECCIÓN APROBADORES ======= -->
+  <section id="section-aprobadores" class="container my-4 d-none">
+    <div class="row g-3" id="gridAprobadores"></div>
+  </section>
+
+  <!-- ======= SECCIÓN ESTADÍSTICAS ======= -->
+  <section id="section-estadisticas" class="container my-4 d-none">
+    <div class="row g-4">
+      <div class="col-lg-6"><div class="card p-3"><h6 class="mini-title mb-2">Aprobaciones por Jefe</h6><canvas id="chartAprobaciones"></canvas></div></div>
+      <div class="col-lg-6"><div class="card p-3"><h6 class="mini-title mb-2">Tiempos promedio (días)</h6><canvas id="chartTiempos"></canvas></div></div>
+      <div class="col-lg-6"><div class="card p-3"><h6 class="mini-title mb-2">Distribución de Permisos</h6><canvas id="chartPermisos"></canvas></div></div>
+      <div class="col-lg-6"><div class="card p-3"><h6 class="mini-title mb-2">Trámites por Estado</h6><canvas id="chartEstados"></canvas></div></div>
+    </div>
+  </section>
+
+  <!-- TEMPLATE CARD JEFE -->
+  <template id="tplCard">
+    <div class="col-12 col-sm-6 col-lg-4">
+      <div class="card h-100">
+        <div class="card-header d-flex align-items-center justify-content-between">
+          <span class="nombre"></span>
+          <span class="badge badge-level nivel"></span>
+        </div>
+        <div class="card-body">
+          <div class="d-flex align-items-center gap-3 mb-3">
+            <img class="avatar" alt="Avatar" />
+            <div>
+              <div class="fw-semibold cargo"></div>
+              <div class="text-muted small sector"></div>
+              <div class="mt-1"><span class="badge role-badge rol"></span></div>
+            </div>
+          </div>
+          <div class="mini-title">Funciones</div>
+          <p class="mb-2 funciones"></p>
+          <div class="mini-title">Permisos en SGI</div>
+          <ul class="small ps-3 mb-3 permisos"></ul>
+          <div class="d-flex flex-wrap gap-2">
+            <button class="btn btn-sm btn-outline-primary verExpedientes"><i class="bi bi-folder2-open"></i> Trámites</button>
+            <button class="btn btn-sm btn-outline-secondary contactar"><i class="bi bi-envelope"></i> Contactar</button>
+            <button class="btn btn-sm btn-outline-success verStats"><i class="bi bi-graph-up-arrow"></i> Stats</button>
+            <button class="btn btn-sm btn-outline-warning editarRol"><i class="bi bi-shield-lock"></i> Editar rol</button>
+          </div>
+          <div class="divider my-3"></div>
+          <div class="d-flex flex-wrap gap-2 small">
+            <span class="stat-chip"><i class="bi bi-check2-circle"></i> <span class="kpiAprob"></span> aprobaciones</span>
+            <span class="stat-chip"><i class="bi bi-clock-history"></i> Último acceso: <span class="ultimoAcceso"></span></span>
+            <span class="stat-chip estadoChip"></span>
+          </div>
+        </div>
+      </div>
+    </div>
+  </template>
+
+  <!-- TEMPLATE CARD APROBADOR -->
+  <template id="tplAprobador">
+    <div class="col-12 col-sm-6 col-lg-4">
+      <div class="card h-100">
+        <div class="card-body">
+          <div class="d-flex justify-content-between align-items-start">
+            <div>
+              <h5 class="mb-0 nombre"></h5>
+              <div class="text-muted small cargo"></div>
+            </div>
+            <span class="chip"><i class="bi bi-person-check"></i> <span class="activos"></span> activos</span>
+          </div>
+          <div class="mt-3 d-flex gap-3 small">
+            <div><i class="bi bi-folder-check"></i> Aprobados: <span class="kpiOk"></span></div>
+            <div><i class="bi bi-hourglass-split"></i> Pendientes: <span class="kpiPend"></span></div>
+          </div>
+          <div class="mt-3">
+            <button class="btn btn-sm btn-outline-primary verAsignados"><i class="bi bi-list-task"></i> Ver asignados</button>
+          </div>
+        </div>
+      </div>
+    </div>
+  </template>
+
+  <!-- MODAL EDITAR ROL/PERMISOS -->
+  <div class="modal fade" id="modalPermisos" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-scrollable">
+      <div class="modal-content">
+        <div class="modal-header" style="background:var(--pfa-azul);color:#fff">
+          <h5 class="modal-title"><i class="bi bi-shield-lock"></i> Editar rol y permisos</h5>
+          <button class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+        </div>
+        <div class="modal-body">
+          <div class="mb-3">
+            <label class="form-label">Nombre</label>
+            <input id="frmNombre" type="text" class="form-control" disabled />
+          </div>
+          <div class="mb-3">
+            <label class="form-label">Rol</label>
+            <select id="frmRol" class="form-select">
+              <option>Jefe de División</option>
+              <option>Supervisión</option>
+              <option>Coordinación</option>
+              <option>Soporte</option>
+            </select>
+          </div>
+          <div class="row g-2">
+            <div class="col-12"><span class="mini-title">Permisos</span></div>
+            <div class="col-6">
+              <div class="form-check"><input class="form-check-input perm-chk" type="checkbox" value="validar_doc" id="p1"><label class="form-check-label" for="p1">Validar Documentación</label></div>
+              <div class="form-check"><input class="form-check-input perm-chk" type="checkbox" value="aprobar_ingreso" id="p2"><label class="form-check-label" for="p2">Aprobar Ingreso</label></div>
+              <div class="form-check"><input class="form-check-input perm-chk" type="checkbox" value="asignar_aspirantes" id="p3"><label class="form-check-label" for="p3">Asignar Aspirantes</label></div>
+            </div>
+            <div class="col-6">
+              <div class="form-check"><input class="form-check-input perm-chk" type="checkbox" value="ver_estadisticas" id="p4"><label class="form-check-label" for="p4">Ver Estadísticas</label></div>
+              <div class="form-check"><input class="form-check-input perm-chk" type="checkbox" value="gestionar_usuarios" id="p5"><label class="form-check-label" for="p5">Gestionar Usuarios</label></div>
+              <div class="form-check"><input class="form-check-input perm-chk" type="checkbox" value="descargar_documentacion" id="p6"><label class="form-check-label" for="p6">Descargar Documentación</label></div>
+            </div>
+          </div>
+        </div>
+        <div class="modal-footer">
+          <button class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
+          <button class="btn btn-primary" id="btnGuardarPermisos" style="background:var(--pfa-azul)"><i class="bi bi-save2"></i> Guardar</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- MODAL STATS POR JEFE -->
+  <div class="modal fade" id="modalStatsJefe" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-lg">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h5 class="modal-title"><i class="bi bi-person-lines-fill"></i> Estadísticas de <span id="statsNombre"></span></h5>
+          <button class="btn-close" data-bs-dismiss="modal"></button>
+        </div>
+        <div class="modal-body">
+          <div class="row g-4">
+            <div class="col-12"><canvas id="chartLineaJefe"></canvas></div>
+            <div class="col-12"><canvas id="chartRadarJefe"></canvas></div>
+          </div>
+        </div>
+        <div class="modal-footer"><button class="btn btn-secondary" data-bs-dismiss="modal">Cerrar</button></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- MODAL DETALLE TRÁMITE -->
+  <div class="modal fade" id="modalTramite" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-lg">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h5 class="modal-title"><i class="bi bi-folder2-open"></i> Trámite <span id="mtId"></span> – <span id="mtAspirante"></span></h5>
+          <button class="btn-close" data-bs-dismiss="modal"></button>
+        </div>
+        <div class="modal-body">
+          <div class="row g-3">
+            <div class="col-md-6">
+              <div class="mini-title mb-1">Datos</div>
+              <ul class="list-unstyled small">
+                <li><strong>DNI:</strong> <span id="mtDni"></span></li>
+                <li><strong>Escalafón:</strong> <span id="mtEsc"></span></li>
+                <li><strong>Estado:</strong> <span id="mtEstado"></span></li>
+                <li><strong>Jefe:</strong> <span id="mtJefe"></span></li>
+                <li><strong>Aprobador:</strong> <span id="mtAprob"></span></li>
+                <li><strong>Ingreso:</strong> <span id="mtIngreso"></span></li>
+                <li><strong>SLA:</strong> <span id="mtSla"></span> días</li>
+              </ul>
+              <a class="btn btn-sm btn-outline-secondary" href="#"><i class="bi bi-cloud-download"></i> Descargar documentación (demo)</a>
+            </div>
+            <div class="col-md-6">
+              <div class="mini-title mb-1">Línea de tiempo</div>
+              <ul id="mtTimeline" class="list-group list-group-flush small"></ul>
+            </div>
+          </div>
+        </div>
+        <div class="modal-footer">
+          <button class="btn btn-outline-primary" id="mtBtnValidar"><i class="bi bi-check2-square"></i> Marcar Validado</button>
+          <button class="btn btn-outline-success" id="mtBtnAprobar"><i class="bi bi-patch-check"></i> Aprobar</button>
+          <button class="btn btn-outline-secondary" data-bs-dismiss="modal">Cerrar</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- OFFCANVAS AYUDA -->
+  <div class="offcanvas offcanvas-end" id="panelAyuda" tabindex="-1">
+    <div class="offcanvas-header"><h5 class="offcanvas-title">Ayuda rápida</h5><button type="button" class="btn-close" data-bs-dismiss="offcanvas"></button></div>
+    <div class="offcanvas-body small">
+      <p><strong>Perfiles de Jefes:</strong> administra roles, permisos y KPIs. El botón <em>Trámites</em> filtra la vista de trámites por ese jefe.</p>
+      <p><strong>Trámites:</strong> buscá por ID/DNI, filtrá por escalafón/estado/jefe y cambiá entre vista Tabla y Kanban. Abrí un trámite para ver su línea de tiempo y descargar documentos.</p>
+      <p><strong>Aprobadores:</strong> control de carga y resultados por aprobador.</p>
+      <p><strong>Estadísticas:</strong> panel consolidado con gráficos Chart.js.</p>
+    </div>
+  </div>
+
+  <!-- SCRIPTS -->
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+  <script>
+    // ======== DATOS DEMO ========
+    const jefes = [
+      {id:1,nombre:"Comisario Alejandro Javier LÓPEZ",cargo:"Jefe División",rol:"Jefe División",sector:"Div. Incorporaciones",nivel:1,funciones:"Supervisión general, aprobación final de inscripciones, validación de documentación.",permisos:["validar_doc","aprobar_ingreso","ver_estadisticas","gestionar_usuarios","descargar_documentacion"],email:"incorporaciones@pfa.gob.ar",avatar:"jefe1.jpg",estado:"Activo",kpiAprob:428,ultimoAcceso:"06/10/2025 10:45"},
+      {id:2,nombre:"Subcomisario Nicolás Ricardo AREÁN",cargo:"2° Jefe ",rol:"Supervisión",sector:"Validación Documental",nivel:2,funciones:"Revisión de datos, control documental, derivación a aprobadores.",permisos:["validar_doc","asignar_aspirantes","ver_estadisticas","descargar_documentacion"],email:"micaela.torres@pfa.gob.ar",avatar:"jefe2.jpg",estado:"En servicio",kpiAprob:301,ultimoAcceso:"05/10/2025 15:12"},
+      {id:3,nombre:"Inspector Jonathan Alejo NAVARRO",cargo:"Coordinación",rol:"Coordinación",sector:"Gestión de Aprobadores",nivel:3,funciones:"Gestión de aprobadores, seguimiento de tiempos y eficiencia del flujo SGI.",permisos:["asignar_aspirantes","ver_estadisticas"],email:"gustavo.diaz@pfa.gob.ar",avatar:"jefe3.jpg",estado:"Disponible",kpiAprob:198,ultimoAcceso:"06/10/2025 08:22"},
+      {id:4,nombre:"Ayudante Micaela Ayelén aMARTINEZ GOMEZ",cargo:"Soporte",rol:"Soporte",sector:"Soporte Técnico",nivel:4,funciones:"Mantenimiento de cuentas, soporte a aprobadores y jefes, capacitación.",permisos:["gestionar_usuarios","ver_estadisticas"],email:"laura.benitez@pfa.gob.ar",avatar:"jefe4.jpg",estado:"Activo",kpiAprob:64,ultimoAcceso:"04/10/2025 19:05"},
+    ];
+
+    const aprobadores = [
+      {id:11,nombre:"Ag. Nicolás Pérez",cargo:"Aprobador Senior",kpiOk:156,kpiPend:23,activos:42},
+      {id:12,nombre:"Ag. Daniela Ruiz",cargo:"Aprobador",kpiOk:121,kpiPend:31,activos:37},
+      {id:13,nombre:"Ag. Martín López",cargo:"Aprobador",kpiOk:97,kpiPend:45,activos:54},
+    ];
+
+    const PERM_NOMBRE = {
+      validar_doc: "Validar Documentación", aprobar_ingreso: "Aprobar Ingreso", asignar_aspirantes: "Asignar Aspirantes", ver_estadisticas: "Ver Estadísticas", gestionar_usuarios: "Gestionar Usuarios", descargar_documentacion: "Descargar Documentación",
+    };
+
+    // Trámites demo
+    const tramites = Array.from({length:36}).map((_,i)=>{
+      const esc = ["SEG","COM","BOM"][Math.floor(Math.random()*3)];
+      const ests = ["Ingreso de Datos","Validación","Aprobación","Archivado"];
+      const est = ests[Math.floor(Math.random()*ests.length)];
+      const jefe = jefes[Math.floor(Math.random()*jefes.length)];
+      const aprob = aprobadores[Math.floor(Math.random()*aprobadores.length)];
+      const dia = Math.max(1, Math.floor(Math.random()*25));
+      return {
+        id: String(1000+i), aspirante: `Aspirante ${i+1}`, dni: String(38000000 + i*13),
+        escalafon: esc, estado: est, jefeId: jefe.id, aprobadorId: aprob.id,
+        ingreso: `2025-09-${String(dia).padStart(2,'0')}`, sla: Math.floor(2+Math.random()*10),
+        timeline:[{t:"Ingreso de Datos",f:`2025-09-${String(Math.max(1,dia-3)).padStart(2,'0')}`},{t:"Validación",f:`2025-09-${String(Math.max(1,dia-2)).padStart(2,'0')}`},{t:"Aprobación",f:`2025-09-${String(Math.max(1,dia-1)).padStart(2,'0')}`}]
+      }
+    });
+
+    // ======== NAV SECTIONS ========
+    const sections = {
+      perfiles: document.getElementById('section-perfiles'),
+      tramites: document.getElementById('section-tramites'),
+      aprobadores: document.getElementById('section-aprobadores'),
+      estadisticas: document.getElementById('section-estadisticas')
+    };
+    document.querySelectorAll('.nav-link').forEach(a=>{
+      a.addEventListener('click', (e)=>{
+        e.preventDefault();
+        const sec = a.dataset.section;
+        document.querySelectorAll('.nav-link').forEach(n=>n.classList.remove('active'));
+        a.classList.add('active');
+        Object.values(sections).forEach(s=> s.classList.add('d-none'));
+        sections[sec].classList.remove('d-none');
+        if(sec==='estadisticas') dibujarChartsGlobal();
+      });
+    });
+
+    // ======== RENDER JEFES ========
+    const grid = document.getElementById('gridJefes');
+    function crearCard(j){
+      const tpl = document.getElementById('tplCard');
+      const node = tpl.content.cloneNode(true);
+      node.querySelector('.nombre').textContent = j.nombre;
+      node.querySelector('.nivel').textContent = `Nivel ${j.nivel}`;
+      const av = node.querySelector('.avatar');
+      av.src = j.avatar; av.alt = j.nombre; av.onerror = () => { av.src = 'https://ui-avatars.com/api/?background=0D8ABC&color=fff&name=' + encodeURIComponent(j.nombre); };
+      node.querySelector('.cargo').textContent = j.cargo;
+      node.querySelector('.rol').textContent = j.rol;
+      node.querySelector('.sector').textContent = j.sector;
+      node.querySelector('.funciones').textContent = j.funciones;
+      const ul = node.querySelector('.permisos'); ul.innerHTML = '';
+      j.permisos.forEach(p=>{ const li = document.createElement('li'); li.textContent = PERM_NOMBRE[p] || p; ul.appendChild(li); });
+      node.querySelector('.kpiAprob').textContent = j.kpiAprob;
+      node.querySelector('.ultimoAcceso').textContent = j.ultimoAcceso;
+      node.querySelector('.estadoChip').innerHTML = `<i class="bi bi-activity"></i> ${j.estado}`;
+      // Botones
+      node.querySelector('.verExpedientes').addEventListener('click',()=>{
+        // Salta a la sección Trámites filtrando por jefe
+        document.querySelector('[data-section="tramites"]').click();
+        filJefe.value = j.id; aplicarFiltrosTramites();
+      });
+      node.querySelector('.contactar').addEventListener('click',()=>{ window.location.href = `mailto:${j.email}?subject=Consulta%20SGI`; });
+      node.querySelector('.verStats').addEventListener('click',()=> abrirModalStatsJefe(j));
+      node.querySelector('.editarRol').addEventListener('click',()=> abrirModalPermisos(j));
+      return node;
+    }
+    function renderGrid(lista){ grid.innerHTML = ''; if(!lista.length){ grid.innerHTML = '<div class="col-12"><div class="alert alert-warning">No se encontraron jefes con los filtros actuales.</div></div>'; return;} lista.forEach(j=> grid.appendChild(crearCard(j))); }
+
+    // Filtros/búsqueda jefes
+    const searchInput = document.getElementById('searchInput');
+    const sectorFilter = document.getElementById('sectorFilter');
+    const nivelFilter  = document.getElementById('nivelFilter');
+    const resetBtn     = document.getElementById('resetBtn');
+    document.getElementById('permisoChips').addEventListener('click', (e)=>{
+      const pill = e.target.closest('.filter-pill'); if(!pill) return;
+      const activo = pill.classList.contains('active');
+      document.querySelectorAll('.filter-pill').forEach(p=>p.classList.remove('active'));
+      if(!activo) pill.classList.add('active'); aplicaFiltrosJefes();
+    });
+    [searchInput, sectorFilter, nivelFilter].forEach(el=> el.addEventListener('input', aplicaFiltrosJefes));
+    resetBtn.addEventListener('click',()=>{ searchInput.value=''; sectorFilter.value=''; nivelFilter.value=''; document.querySelectorAll('.filter-pill').forEach(p=>p.classList.remove('active')); renderGrid(jefes); });
+    function aplicaFiltrosJefes(){
+      const q = searchInput.value.trim().toLowerCase(); const sector = sectorFilter.value; const nivel = nivelFilter.value; const pillActiva = document.querySelector('.filter-pill.active'); const permRequerida = pillActiva ? pillActiva.dataset.perm : '';
+      const lista = jefes.filter(j=>{ if(sector && j.sector !== sector) return false; if(nivel && String(j.nivel)!==String(nivel)) return false; if(permRequerida && !j.permisos.includes(permRequerida)) return false; if(!q) return true; const blob = [j.nombre,j.cargo,j.rol,j.sector,j.funciones, j.permisos.map(p=>PERM_NOMBRE[p]).join(' ')].join(' ').toLowerCase(); return blob.includes(q); });
+      renderGrid(lista);
+    }
+
+    // ======== MODAL PERMISOS ========
+    let jefeEditando = null;
+    const modalPermisosEl = document.getElementById('modalPermisos');
+    const modalPermisos = new bootstrap.Modal(modalPermisosEl);
+    const frmNombre = document.getElementById('frmNombre');
+    const frmRol = document.getElementById('frmRol');
+    const btnGuardarPermisos = document.getElementById('btnGuardarPermisos');
+    function abrirModalPermisos(j){ jefeEditando = j; frmNombre.value = j.nombre; frmRol.value = j.rol; document.querySelectorAll('.perm-chk').forEach(chk=>{ chk.checked = j.permisos.includes(chk.value); }); modalPermisos.show(); }
+    btnGuardarPermisos.addEventListener('click',()=>{ if(!jefeEditando) return; jefeEditando.rol = frmRol.value; const nuevos=[]; document.querySelectorAll('.perm-chk').forEach(chk=>{ if(chk.checked) nuevos.push(chk.value) }); jefeEditando.permisos = nuevos; modalPermisos.hide(); aplicaFiltrosJefes(); });
+
+    // ======== STATS POR JEFE ========
+    const modalStatsEl = document.getElementById('modalStatsJefe');
+    const modalStats = new bootstrap.Modal(modalStatsEl);
+    const statsNombre = document.getElementById('statsNombre');
+    let chartLinea, chartRadar;
+    function abrirModalStatsJefe(j){ statsNombre.textContent = j.nombre; modalStats.show(); setTimeout(()=>{ if(chartLinea) chartLinea.destroy(); if(chartRadar) chartRadar.destroy(); chartLinea = new Chart(document.getElementById('chartLineaJefe'),{ type:'line', data:{ labels:['Sem 1','Sem 2','Sem 3','Sem 4','Sem 5','Sem 6'], datasets:[{label:'Aprobaciones/sem', data: Array.from({length:6},()=> Math.floor(j.kpiAprob/12 + Math.random()*20)) }] }, options:{responsive:true} }); chartRadar = new Chart(document.getElementById('chartRadarJefe'),{ type:'radar', data:{ labels:['Calidad','Velocidad','Cumplimiento','Documentación','Gestión'], datasets:[{label:'Índice', data:[80,75,88,83,79].map(v=> Math.max(60, Math.min(95, v + (j.nivel-2)*4)))}] }, options:{responsive:true} }); },150); }
+
+    // ======== APROBADORES ========
+    const gridAprobadores = document.getElementById('gridAprobadores');
+    function renderAprobadores(){
+      gridAprobadores.innerHTML = '';
+      const tpl = document.getElementById('tplAprobador');
+      aprobadores.forEach(a=>{
+        const node = tpl.content.cloneNode(true);
+        node.querySelector('.nombre').textContent = a.nombre;
+        node.querySelector('.cargo').textContent = a.cargo;
+        node.querySelector('.kpiOk').textContent = a.kpiOk;
+        node.querySelector('.kpiPend').textContent = a.kpiPend;
+        node.querySelector('.activos').textContent = a.activos;
+        node.querySelector('.verAsignados').addEventListener('click',()=>{
+          document.querySelector('[data-section="tramites"]').click();
+          filJefe.value = ''; aplicarFiltrosTramites(); // limpiar filtro jefe
+          // filtra por aprobador
+          aplicarFiltrosTramites({ aprobadorId: a.id });
+        });
+        gridAprobadores.appendChild(node);
+      })
+    }
+
+    // ======== TRÁMITES (TABLA + KANBAN) ========
+    const tablaBody = document.querySelector('#tablaTramites tbody');
+    const buscarTramite = document.getElementById('buscarTramite');
+    const filEscalafon = document.getElementById('filEscalafon');
+    const filEstado = document.getElementById('filEstado');
+    const filJefe = document.getElementById('filJefe');
+    const btnVistaTabla = document.getElementById('btnVistaTabla');
+    const btnVistaKanban = document.getElementById('btnVistaKanban');
+    const vistaTabla = document.getElementById('vistaTabla');
+    const vistaKanban = document.getElementById('vistaKanban');
+
+    // Popular listado de jefes en filtro
+    function poblarFiltroJefe(){ filJefe.innerHTML = '<option value="">Todos</option>' + jefes.map(j=>`<option value="${j.id}">${j.nombre}</option>`).join(''); }
+
+    function badgeEscalafon(esc){ return esc==='SEG'?'<span class="badge badge-esc seg">Seguridad</span>': esc==='COM'?'<span class="badge badge-esc com">Comunicaciones</span>':'<span class="badge badge-esc bom">Bomberos</span>'; }
+
+    function renderTabla(datos){
+      tablaBody.innerHTML = '';
+      datos.forEach(t=>{
+        const tr = document.createElement('tr');
+        tr.innerHTML = `
+          <td>${t.id}</td>
+          <td>${t.aspirante}</td>
+          <td>${t.dni}</td>
+          <td>${badgeEscalafon(t.escalafon)}</td>
+          <td>${t.estado}</td>
+          <td>${jefes.find(j=>j.id===t.jefeId)?.nombre||''}</td>
+          <td>${aprobadores.find(a=>a.id===t.aprobadorId)?.nombre||''}</td>
+          <td>${t.ingreso}</td>
+          <td>${t.sla}</td>
+          <td><button class="btn btn-sm btn-outline-primary" data-id="${t.id}"><i class="bi bi-eye"></i></button></td>`;
+        tr.querySelector('button').addEventListener('click',()=> abrirTramite(t.id));
+        tablaBody.appendChild(tr);
+      });
+    }
+
+    function renderKanban(datos){
+      const cols = {"Ingreso de Datos":document.getElementById('colIngreso'),"Validación":document.getElementById('colValidacion'),"Aprobación":document.getElementById('colAprobacion'),"Archivado":document.getElementById('colArchivado')};
+      Object.values(cols).forEach(c=> c.innerHTML='');
+      datos.forEach(t=>{
+        const div = document.createElement('div'); div.className='kanban-card';
+        div.innerHTML = `<div class="d-flex justify-content-between"><strong>#${t.id}</strong><span>${badgeEscalafon(t.escalafon)}</span></div>
+                         <div class="small text-muted">${t.aspirante} • DNI ${t.dni}</div>
+                         <div class="small">Jefe: ${jefes.find(j=>j.id===t.jefeId)?.nombre||''}</div>
+                         <div class="small">Aprobador: ${aprobadores.find(a=>a.id===t.aprobadorId)?.nombre||''}</div>
+                         <div class="mt-1"><button class="btn btn-sm btn-outline-primary"><i class="bi bi-eye"></i> Ver</button></div>`;
+        div.querySelector('button').addEventListener('click',()=> abrirTramite(t.id));
+        cols[t.estado].appendChild(div);
+      });
+    }
+
+    function aplicarFiltrosTramites(extra={}){
+      const q = buscarTramite.value.trim().toLowerCase();
+      const esc = filEscalafon.value; const est = filEstado.value; const jefeSel = filJefe.value; const aprobSel = extra.aprobadorId || null;
+      const datos = tramites.filter(t=>{
+        if(esc && t.escalafon!==esc) return false;
+        if(est && t.estado!==est) return false;
+        if(jefeSel && String(t.jefeId)!==String(jefeSel)) return false;
+        if(aprobSel && t.aprobadorId!==aprobSel) return false;
+        if(!q) return true; const blob = `${t.id} ${t.aspirante} ${t.dni}`.toLowerCase(); return blob.includes(q);
+      });
+      renderTabla(datos); renderKanban(datos); actualizarChartEstados(datos);
+    }
+
+    [buscarTramite, filEscalafon, filEstado, filJefe].forEach(el=> el.addEventListener('input', ()=> aplicarFiltrosTramites()));
+    btnVistaTabla.addEventListener('click',()=>{ vistaTabla.classList.remove('d-none'); vistaKanban.classList.add('d-none'); });
+    btnVistaKanban.addEventListener('click',()=>{ vistaKanban.classList.remove('d-none'); vistaTabla.classList.add('d-none'); });
+
+    // Detalle de trámite
+    const mtId=document.getElementById('mtId'), mtAspirante=document.getElementById('mtAspirante'), mtDni=document.getElementById('mtDni'), mtEsc=document.getElementById('mtEsc'), mtEstado=document.getElementById('mtEstado'), mtJefe=document.getElementById('mtJefe'), mtAprob=document.getElementById('mtAprob'), mtIngreso=document.getElementById('mtIngreso'), mtSla=document.getElementById('mtSla'), mtTimeline=document.getElementById('mtTimeline');
+    const modalTramite = new bootstrap.Modal(document.getElementById('modalTramite'));
+    function abrirTramite(id){
+      const t = tramites.find(x=> x.id==id); if(!t) return;
+      mtId.textContent = t.id; mtAspirante.textContent = t.aspirante; mtDni.textContent = t.dni;
+      mtEsc.innerHTML = badgeEscalafon(t.escalafon); mtEstado.textContent = t.estado;
+      mtJefe.textContent = jefes.find(j=>j.id===t.jefeId)?.nombre||''; mtAprob.textContent = aprobadores.find(a=>a.id===t.aprobadorId)?.nombre||'';
+      mtIngreso.textContent = t.ingreso; mtSla.textContent = t.sla;
+      mtTimeline.innerHTML = '';
+      t.timeline.forEach(step=>{ const li=document.createElement('li'); li.className='list-group-item'; li.textContent = `${step.t} – ${step.f}`; mtTimeline.appendChild(li); });
+      modalTramite.show();
+    }
+    document.getElementById('mtBtnValidar').addEventListener('click',()=>{ alert('[Demo] Trámite marcado como Validado.'); });
+    document.getElementById('mtBtnAprobar').addEventListener('click',()=>{ alert('[Demo] Trámite Aprobado.'); });
+
+    // ======== ESTADÍSTICAS ========
+    let chartsGlobal = [];
+    function dibujarChartsGlobal(){ chartsGlobal.forEach(c=> c.destroy()); chartsGlobal=[]; 
+      const ctx1 = document.getElementById('chartAprobaciones'); chartsGlobal.push(new Chart(ctx1,{ type:'bar', data:{ labels:jefes.map(j=>j.nombre.split(' ')[0]+" "+j.nombre.split(' ')[1]), datasets:[{label:'Aprobaciones', data:jefes.map(j=>j.kpiAprob)}] }, options:{responsive:true,plugins:{legend:{display:false}}} }));
+      const ctx2 = document.getElementById('chartTiempos'); chartsGlobal.push(new Chart(ctx2,{ type:'line', data:{ labels:['Ene','Feb','Mar','Abr','May','Jun','Jul','Ago','Sep','Oct'], datasets:[{label:'Tiempo prom. (días)', data:[5.2,5.8,4.9,4.2,3.8,3.6,3.9,4.1,3.7,3.5]}] }, options:{responsive:true} }));
+      const allPerms = Object.keys(PERM_NOMBRE); const conteo = allPerms.map(p=> jefes.filter(j=> j.permisos.includes(p)).length); const ctx3 = document.getElementById('chartPermisos'); chartsGlobal.push(new Chart(ctx3,{ type:'doughnut', data:{labels:allPerms.map(p=>PERM_NOMBRE[p]), datasets:[{data:conteo}]}, options:{responsive:true} }));
+      const ctx4 = document.getElementById('chartEstados'); const counts = {Ingreso:0,Validación:0,Aprobación:0,Archivado:0}; tramites.forEach(t=>{ if(t.estado.startsWith('Ingreso')) counts.Ingreso++; else if(t.estado==='Validación') counts.Validación++; else if(t.estado==='Aprobación') counts.Aprobación++; else counts.Archivado++; }); chartsGlobal.push(new Chart(ctx4,{ type:'bar', data:{ labels:Object.keys(counts), datasets:[{label:'Trámites', data:Object.values(counts)}] }, options:{responsive:true,plugins:{legend:{display:false}}} }));
+    }
+    function actualizarChartEstados(datos){ const ctx = document.getElementById('chartEstados'); if(!ctx) return; if(chartsGlobal[3]){ chartsGlobal[3].data.datasets[0].data = [ datos.filter(t=>t.estado.startsWith('Ingreso')).length, datos.filter(t=>t.estado==='Validación').length, datos.filter(t=>t.estado==='Aprobación').length, datos.filter(t=>t.estado==='Archivado').length ]; chartsGlobal[3].update(); }
+    }
+
+    // ======== NUEVO JEFE (DEMO IN-MEMORY) ========
+    document.getElementById('nuevoJefeBtn').addEventListener('click',()=>{
+      const nombre = prompt('Nombre completo del jefe:'); if(!nombre) return;
+      const cargo  = prompt('Cargo (Jefe de División / Supervisión / Coordinación / Soporte):') || 'Supervisión';
+      const sector = prompt('Sector (Div. Incorporaciones / Validación Documental / Gestión de Aprobadores / Soporte Técnico):') || 'Div. Incorporaciones';
+      const nivel  = Number(prompt('Nivel jerárquico (1-4):') || 3);
+      const id = Math.max(...jefes.map(x=>x.id))+1;
+      jefes.push({ id, nombre, cargo, rol:cargo, sector, nivel:isNaN(nivel)?3:nivel, funciones:'Definir funciones…', permisos:['ver_estadisticas'], email:(nombre.split(' ')[0]||'usuario').toLowerCase()+'.auto@pfa.gob.ar', avatar:'https://ui-avatars.com/api/?background=0D8ABC&color=fff&name=' + encodeURIComponent(nombre), estado:'Activo', kpiAprob: Math.floor(50+Math.random()*150), ultimoAcceso:new Date().toLocaleString() });
+      poblarFiltroJefe(); aplicaFiltrosJefes();
+    });
+
+    // ======== INIT ========
+    renderGrid(jefes); poblarFiltroJefe(); renderAprobadores(); renderTabla(tramites); renderKanban(tramites); dibujarChartsGlobal();
+  </script>
+</body>
+</html>

@@ -1,0 +1,543 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Mesa de Aprobadores — PFA</title>
+
+<link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+<link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.css" rel="stylesheet">
+
+<style>
+:root{
+  --pfa:#0e2a50;--pfa2:#1d4b97;--ok:#198754;--warn:#f59f00;--danger:#e03131;
+  --soft:#f6f9ff;--muted:#6c757d;
+}
+body{background:#f5f7fb;font-family:"Segoe UI",sans-serif;}
+header{background:linear-gradient(90deg,var(--pfa),var(--pfa2));color:#fff;padding:.8rem 0;}
+.card{border:0;box-shadow:0 6px 18px rgba(10,30,60,.06);border-radius:16px;}
+.card-header{border-bottom:1px solid #e7ebf2;}
+.badge-chip{border-radius:20px;font-weight:600;}
+.badge-clase-SEGURIDAD{background:#0d6efd!important;color:#fff;}
+.badge-clase-COMUNICACIONES{background:#ffc107!important;color:#000;}
+.badge-clase-BOMBEROS{background:#dc3545!important;color:#fff;}
+.region-amba{background:#0d6efd!important;}
+.region-caba{background:#6f42c1!important;}
+.region-interior{background:#198754!important;}
+.ck-row{display:grid;grid-template-columns:1fr auto auto auto;align-items:center;gap:.4rem;
+        border-bottom:1px solid #e6e9ef;padding:.35rem .5rem;}
+.ck-obs-wrap{background:#fff8e6;border:1px solid #ffe2a8;border-radius:10px;padding:8px;margin:8px 12px;}
+.ck-obs-wrap textarea{width:100%;min-height:60px;resize:vertical;}
+.ck-obs-title{font-weight:600;color:#8a6d3b;margin-bottom:6px;display:flex;align-items:center;gap:6px;}
+.accordion-button{font-weight:600;background:#f8f9fc;color:#0d3b66;}
+.accordion-button:not(.collapsed){background:#e9f0ff;}
+#map{width:100%;height:280px;border-radius:12px;}
+</style>
+</head>
+
+<body>
+<header class="px-3">
+  <div class="container-fluid d-flex justify-content-between align-items-center">
+    <div class="d-flex align-items-center gap-2">
+      <i class="bi bi-clipboard2-check fs-5"></i>
+      <div>
+        <div class="fw-bold">Mesa de Aprobadores — PFA</div>
+        <div class="small">Control, documentación y elevaciones</div>
+      </div>
+    </div>
+    <div class="small">Usuario: <strong>aprobadores.demo</strong></div>
+  </div>
+</header>
+
+<main class="container-fluid my-3 px-3">
+  <div class="card mb-3">
+    <div class="card-body d-flex flex-wrap gap-2 align-items-center">
+      <div class="input-group" style="max-width:280px;">
+        <span class="input-group-text"><i class="bi bi-search"></i></span>
+        <input id="q" class="form-control" placeholder="Buscar por nombre o DNI">
+      </div>
+      <select id="filtroRegion" class="form-select" style="max-width:200px;">
+        <option value="ALL">Todas las regiones</option>
+        <option value="AMBA">AMBA</option>
+        <option value="CABA">CABA</option>
+        <option value="INTERIOR">Interior</option>
+      </select>
+      <select id="filtroZonaAmba" class="form-select" style="max-width:180px;display:none;">
+        <option value="ALL">Todas las zonas</option>
+        <option value="NORTE">Zona Norte</option>
+        <option value="SUR">Zona Sur</option>
+        <option value="OESTE">Zona Oeste</option>
+      </select>
+      <select id="filtroEstado" class="form-select" style="max-width:200px;">
+        <option value="ALL">Todos los estados</option>
+        <option value="APROBACION_PENDIENTE">Aprobadores</option>
+        <option value="ELEVADO">Elevado</option>
+        <option value="RECHAZADO">Rechazado</option>
+      </select>
+      <button class="btn btn-outline-secondary ms-auto" id="btnResetFiltros">
+        <i class="bi bi-x-circle"></i> Limpiar
+      </button>
+    </div>
+  </div>
+
+  <div class="row g-3">
+    <div class="col-lg-4">
+      <div class="card">
+        <div class="card-header d-flex justify-content-between align-items-center">
+          <strong>Listado de Aspirantes</strong>
+          <small class="text-muted">Doble clic para abrir</small>
+        </div>
+        <div id="lstAspirantes" style="max-height:70vh;overflow:auto;"></div>
+      </div>
+    </div>
+
+    <div class="col-lg-8">
+      <div class="card">
+        <div class="card-header d-flex flex-wrap justify-content-between align-items-center gap-2">
+          <div class="d-flex align-items-center gap-2">
+            <div class="rounded-circle bg-light d-flex align-items-center justify-content-center"
+                 style="width:48px;height:48px;">
+              <span id="fAvatar" class="fw-bold text-primary">?</span>
+            </div>
+            <div>
+              <div id="fNombre" class="fw-bold">Seleccioná un aspirante</div>
+              <div class="small text-muted">DNI: <span id="fDni">—</span></div>
+            </div>
+          </div>
+          <div class="d-flex flex-wrap align-items-center gap-2">
+            <span id="fClasificacion" class="badge badge-chip">—</span>
+            <span id="fRegionChip" class="badge badge-chip region">—</span>
+            <span id="fZonaChip" class="badge badge-chip" hidden>—</span>
+            <button class="btn btn-success btn-sm" id="btnAprobar"><i class="bi bi-check2-circle"></i></button>
+            <button class="btn btn-outline-danger btn-sm" id="btnRechazar"><i class="bi bi-x-octagon"></i></button>
+          </div>
+        </div>
+        <div class="card-body">
+          <div id="fEmpty" class="text-muted">Elegí un aspirante de la lista.</div>
+          <div id="ficha" hidden>
+            <div id="map"></div>
+            <hr>
+            <div id="accordionChecklist" class="accordion my-3"></div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</main>
+<script>
+// ======================================
+//  DATOS DEMO (pueden venir del sistema)
+// ======================================
+const DATA = [
+  {
+    dni: 45011222,
+    nombre: "Pérez, Juan Ignacio",
+    tipo: "CADETE",
+    area: "SEGURIDAD",
+    region: "AMBA",
+    zonaAmba: "NORTE",
+    provincia: "Buenos Aires",
+    estado: "APROBACION_PENDIENTE",
+    dom: { calle:"Av. San Martín 2200", loc:"San Isidro", cp:"1642", prov:"Buenos Aires" }
+  },
+  {
+    dni: 40123456,
+    nombre: "López, Sofía María",
+    tipo: "AGENTE",
+    area: "COMUNICACIONES",
+    region: "CABA",
+    provincia: "CABA",
+    estado: "ELEVADO",
+    dom: { calle:"Av. Rivadavia 3400", loc:"Almagro", cp:"1204", prov:"CABA" }
+  },
+  {
+    dni: 47222333,
+    nombre: "Rodríguez, Esteban",
+    tipo: "CADETE",
+    area: "BOMBEROS",
+    region: "INTERIOR",
+    provincia: "Córdoba",
+    estado: "RECHAZADO",
+    dom: { calle:"Sarmiento 100", loc:"Río Cuarto", cp:"5800", prov:"Córdoba" }
+  }
+];
+
+let FILTERED = [...DATA];
+let CURRENT_DNI = null;
+
+// ========================
+//   LISTADO PRINCIPAL
+// ========================
+function initials(n){const s=n.split(" ");return s[0][0]+(s[1]?s[1][0]:"");}
+function estadoTxt(st){return st==="ELEVADO"?"Elevado":st==="RECHAZADO"?"Rechazado":"Pendiente";}
+
+function renderLista(){
+  const list=document.getElementById("lstAspirantes"); list.innerHTML="";
+  FILTERED.forEach(it=>{
+    const clas=`${it.tipo.toUpperCase()} DE ${it.area.toUpperCase()}`;
+    const areaClass="badge-clase-"+it.area.toUpperCase();
+    const regClass=it.region==="AMBA"?"region-amba":it.region==="CABA"?"region-caba":"region-interior";
+    const zona=(it.region==="AMBA"&&it.zonaAmba)?`<span class="badge badge-chip">Zona ${it.zonaAmba}</span>`:"";
+    const html=`
+      <div class="p-2 border-bottom" style="cursor:pointer" ondblclick="openFicha(${it.dni})">
+        <div class="fw-bold">${it.nombre}</div>
+        <div class="small text-muted">DNI ${it.dni}</div>
+        <div class="mt-1 d-flex flex-wrap gap-1">
+          <span class="badge ${areaClass}">${clas}</span>
+          <span class="badge ${regClass}">${it.region}</span>
+          ${zona}
+          <span class="badge text-bg-secondary">${estadoTxt(it.estado)}</span>
+        </div>
+      </div>`;
+    list.insertAdjacentHTML("beforeend",html);
+  });
+}
+
+// ========================
+//     FILTROS Y BÚSQUEDA
+// ========================
+const selRegion=document.getElementById("filtroRegion");
+const selZona=document.getElementById("filtroZonaAmba");
+const selEstado=document.getElementById("filtroEstado");
+const inpQ=document.getElementById("q");
+
+selRegion.addEventListener("change",()=>{
+  if(selRegion.value==="AMBA") selZona.style.display="block";
+  else{selZona.style.display="none";selZona.value="ALL";}
+  applyFilters();
+});
+selZona.addEventListener("change",applyFilters);
+selEstado.addEventListener("change",applyFilters);
+inpQ.addEventListener("input",applyFilters);
+document.getElementById("btnResetFiltros").onclick=()=>{
+  selRegion.value="ALL"; selZona.value="ALL"; selEstado.value="ALL"; inpQ.value="";
+  selZona.style.display="none"; applyFilters();
+};
+
+function applyFilters(){
+  const q=inpQ.value.trim().toLowerCase();
+  const fR=selRegion.value, fZ=selZona.value, fE=selEstado.value;
+  FILTERED=DATA.filter(it=>{
+    if(fR!=="ALL"&&it.region!==fR&&!(fR==="CABA"&&it.provincia==="CABA")) return false;
+    if(fR==="AMBA"&&fZ!=="ALL"&&it.zonaAmba!==fZ) return false;
+    if(fE!=="ALL"&&it.estado!==fE) return false;
+    if(q&&!(`${it.dni}`.includes(q)||it.nombre.toLowerCase().includes(q))) return false;
+    return true;
+  });
+  renderLista();
+}
+
+// ========================
+//     FICHA DETALLADA
+// ========================
+function openFicha(dni){
+  CURRENT_DNI=dni;
+  const it=DATA.find(x=>x.dni===dni);
+  if(!it)return;
+  document.getElementById("fEmpty").hidden=true;
+  document.getElementById("ficha").hidden=false;
+  document.getElementById("fNombre").textContent=it.nombre;
+  document.getElementById("fDni").textContent=it.dni;
+  document.getElementById("fAvatar").textContent=initials(it.nombre);
+
+  const tipo=(it.tipo||"CADETE").toUpperCase();
+  const area=(it.area||"SEGURIDAD").toUpperCase();
+  const clas=`${tipo} DE ${area}`;
+  const fClas=document.getElementById("fClasificacion");
+  fClas.textContent=clas;
+  fClas.className="badge badge-chip badge-clase-"+area;
+
+  const regChip=document.getElementById("fRegionChip");
+  const zonaChip=document.getElementById("fZonaChip");
+  if(it.provincia==="CABA"){
+    regChip.textContent="CABA";regChip.className="badge badge-chip region-caba";zonaChip.hidden=true;
+  }else if(it.region==="AMBA"){
+    regChip.textContent="AMBA";regChip.className="badge badge-chip region-amba";
+    if(it.zonaAmba){zonaChip.hidden=false;zonaChip.textContent="Zona "+it.zonaAmba;}else zonaChip.hidden=true;
+  }else{
+    regChip.textContent="Interior";regChip.className="badge badge-chip region-interior";zonaChip.hidden=true;
+  }
+  showMap(it);
+  renderChecklist(it);
+}
+
+// ========================
+//       GOOGLE MAPS
+// ========================
+let map,geocoder,marker;
+function initMap(){
+  map=new google.maps.Map(document.getElementById("map"),{
+    center:{lat:-34.6037,lng:-58.3816},zoom:10,mapTypeControl:false,streetViewControl:false
+  });
+  geocoder=new google.maps.Geocoder();
+  marker=new google.maps.Marker({map:map});
+}
+function showMap(it){
+  if(!map)initMap();
+  const addr=`${it.dom?.calle||""}, ${it.dom?.loc||""}, ${it.dom?.prov||""}, Argentina`;
+  geocoder.geocode({address:addr},(res,st)=>{
+    if(st==="OK"&&res[0]){
+      map.setCenter(res[0].geometry.location);
+      map.setZoom(13);
+      marker.setPosition(res[0].geometry.location);
+    }
+  });
+}
+
+// ========================
+//     CHECKLIST COMPLETO
+// ========================
+const DOC_GROUPS={
+  "Identificación personal":[
+    "DNI (1º y 2º hoja) / CUIL-CUIT o CDI",
+    "Certificado de nacimiento",
+    "Cuerpo entero (foto)",
+    "Carátula",
+    "Nota de presentación"
+  ],
+  "Formación y antecedentes":[
+    "Certificado de estudios",
+    "Certificado de servicio de FFAA",
+    "Certificado de antecedentes provinciales / locales",
+    "Certificado de reincidencia (aspirante)",
+    "Cert. reincidencia + DNI grupo familiar"
+  ],
+  "Salud y evaluaciones":[
+    "Premédico (fecha)",
+    "Tirilla médica",
+    "Estudios médicos (fecha)",
+    "Protocolo psicotécnico",
+    "Técnica aspirante",
+    "Técnica familiares"
+  ],
+  "Domicilio y entorno":[
+    "Certificado de domicilio",
+    "Fotos de domicilio",
+    "Formulario ambiental",
+    "Datos de vecinos"
+  ],
+  "Familiares":[
+    "Certificado de hijos",
+    "Certificado de matrimonio",
+    "Certificado de defunción",
+    "Familiar en PFA (credencial)"
+  ]
+};
+const DOCS_REQUIEREN_FECHA=new Set(["Estudios médicos (fecha)","Premédico (fecha)"]);
+
+function renderChecklist(it){
+  const cont=document.getElementById("accordionChecklist");
+  cont.innerHTML="";
+  Object.entries(DOC_GROUPS).forEach(([titulo,docs],idx)=>{
+    const id="acc"+idx;
+    cont.insertAdjacentHTML("beforeend",`
+      <div class="accordion-item">
+        <h2 class="accordion-header" id="h${id}">
+          <button class="accordion-button ${idx>0?"collapsed":""}" type="button" data-bs-toggle="collapse" data-bs-target="#c${id}">
+            ${titulo}
+          </button>
+        </h2>
+        <div id="c${id}" class="accordion-collapse collapse ${idx===0?"show":""}">
+          <div class="accordion-body p-2" id="ck-${id}"></div>
+        </div>
+      </div>`);
+    const body=document.getElementById("ck-"+id);
+    docs.forEach(doc=>{body.appendChild(ckRenderRow(it.dni,doc,"FALTA",null,""));});
+  });
+}
+
+function ckRenderRow(dni,docKey,state,fechaISO,obsText){
+  const reqFecha=DOCS_REQUIEREN_FECHA.has(docKey);
+  const row=document.createElement("div");row.className="ck-row";
+  const colDoc=document.createElement("div");colDoc.textContent=docKey;
+  const colState=document.createElement("div");
+  colState.innerHTML=`
+    <div class="btn-group">
+      <input type="radio" class="btn-check" name="st-${dni}-${docKey}" id="stF-${dni}-${docKey}" ${state==="FALTA"?"checked":""}>
+      <label class="btn btn-outline-danger" for="stF-${dni}-${docKey}">FALTA</label>
+      <input type="radio" class="btn-check" name="st-${dni}-${docKey}" id="stO-${dni}-${docKey}" ${state==="OBS"?"checked":""}>
+      <label class="btn btn-outline-warning" for="stO-${dni}-${docKey}">OBS</label>
+      <input type="radio" class="btn-check" name="st-${dni}-${docKey}" id="stK-${dni}-${docKey}" ${state==="OK"?"checked":""}>
+      <label class="btn btn-outline-success" for="stK-${dni}-${docKey}">OK</label>
+    </div>`;
+  const colFecha=document.createElement("div");
+  if(reqFecha){colFecha.innerHTML=`<input type="date" class="form-control form-control-sm" value="${fechaISO||""}">`;}
+  const colMeta=document.createElement("div");
+  colMeta.innerHTML=`<button class="btn btn-sm btn-outline-warning ck-obs-btn"><i class="bi bi-chat-right-text"></i></button>`;
+  row.append(colDoc,colState,colFecha,colMeta);
+  const obsWrap=document.createElement("div");
+  obsWrap.className="ck-obs-wrap";
+  obsWrap.hidden=state!=="OBS";
+  obsWrap.innerHTML=`
+    <div class="ck-obs-title"><i class="bi bi-exclamation-circle"></i> Motivo de observación</div>
+    <textarea placeholder="Ej.: falta legalizar título secundario">${obsText||""}</textarea>`;
+  const cont=document.createElement("div");cont.append(row,obsWrap);
+  colState.addEventListener("change",e=>{
+    const val=e.target.id.includes("stK-")?"OK":e.target.id.includes("stO-")?"OBS":"FALTA";
+    obsWrap.hidden=(val!=="OBS");
+  });
+  colMeta.querySelector("button").addEventListener("click",()=>{obsWrap.hidden=!obsWrap.hidden;});
+  return cont;
+}
+
+// ========================
+//        INICIALIZA
+// ========================
+renderLista();
+applyFilters();
+</script>
+
+<script async defer src="https://maps.googleapis.com/maps/api/js?key=AIzaSyB-WxgExampleKey123456789"></script>
+</body>
+</html>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+<script>
+// ===================================================
+//  GUARDADO LOCAL DE CHECKLIST (LOCALSTORAGE)
+// ===================================================
+const STORAGE_KEY = "pfa_aprobadores_data";
+
+function saveLocal() {
+  localStorage.setItem(STORAGE_KEY, JSON.stringify(DATA));
+}
+function loadLocal() {
+  const raw = localStorage.getItem(STORAGE_KEY);
+  if (!raw) return;
+  try {
+    const arr = JSON.parse(raw);
+    if (Array.isArray(arr)) {
+      arr.forEach((d, i) => (DATA[i] = { ...DATA[i], ...d }));
+    }
+  } catch (e) {
+    console.warn("Error cargando LocalStorage", e);
+  }
+}
+loadLocal();
+
+// ===================================================
+//  GUARDAR CHECKLIST DEL ASPIRANTE ACTUAL
+// ===================================================
+function guardarChecklist() {
+  if (!CURRENT_DNI) return;
+  const ficha = document.getElementById("ficha");
+  if (!ficha) return;
+
+  const it = DATA.find(x => x.dni === CURRENT_DNI);
+  if (!it) return;
+  it.docs = it.docs || {};
+
+  const observacionesSinMotivo = [];
+
+  document.querySelectorAll(".accordion-body").forEach(body => {
+    body.querySelectorAll(".ck-row").forEach(row => {
+      const docKey = row.children[0].textContent.trim();
+      const st = row.querySelector(".btn-check:checked")?.id.includes("stK-")
+        ? "OK"
+        : row.querySelector(".btn-check:checked")?.id.includes("stO-")
+        ? "OBS"
+        : "FALTA";
+      const fecha = row.querySelector("input[type=date]")?.value || "";
+      const obsText = row.nextElementSibling?.querySelector("textarea")?.value || "";
+
+      if (st === "OBS" && !obsText.trim()) {
+        observacionesSinMotivo.push(docKey);
+      }
+
+      it.docs[docKey] = { estado: st, fecha, obs: obsText };
+    });
+  });
+
+  if (observacionesSinMotivo.length > 0) {
+    showToast(
+      "Observaciones faltantes",
+      "Faltan motivos en: " + observacionesSinMotivo.slice(0, 3).join(", ") + (observacionesSinMotivo.length > 3 ? "..." : "")
+    );
+    return;
+  }
+
+  saveLocal();
+  showToast("Cambios guardados", "Checklist actualizado correctamente.");
+}
+
+// ===================================================
+//  EXPORTAR A PDF (usa jsPDF)
+// ===================================================
+function exportarPDF() {
+  if (!CURRENT_DNI) return;
+  const it = DATA.find(x => x.dni === CURRENT_DNI);
+  if (!it) return;
+
+  const { jsPDF } = window.jspdf;
+  const doc = new jsPDF();
+  doc.setFont("helvetica", "bold");
+  doc.setFontSize(16);
+  doc.text("Policía Federal Argentina", 105, 20, null, null, "center");
+  doc.setFontSize(13);
+  doc.text("Mesa de Aprobadores — Informe de Documentación", 105, 28, null, null, "center");
+
+  doc.setFontSize(11);
+  doc.setFont("helvetica", "normal");
+  doc.text(`Nombre: ${it.nombre}`, 14, 40);
+  doc.text(`DNI: ${it.dni}`, 14, 47);
+  doc.text(`Tipo: ${it.tipo}`, 14, 54);
+  doc.text(`Escalafón: ${it.area}`, 14, 61);
+  doc.text(`Región: ${it.region}`, 14, 68);
+  if (it.zonaAmba) doc.text(`Zona AMBA: ${it.zonaAmba}`, 14, 75);
+
+  let y = 88;
+  doc.setFont("helvetica", "bold");
+  doc.text("Checklist de Documentación", 14, y);
+  doc.setFont("helvetica", "normal");
+  y += 6;
+
+  Object.entries(it.docs || {}).forEach(([docName, info]) => {
+    if (y > 270) {
+      doc.addPage();
+      y = 20;
+    }
+    const estado = info.estado || "-";
+    const obs = info.obs ? ` (${info.obs})` : "";
+    doc.text(`• ${docName}: ${estado}${obs}`, 14, y);
+    y += 6;
+  });
+
+  doc.save(`Aspirante_${it.dni}.pdf`);
+}
+
+// ===================================================
+//  TOAST DE CONFIRMACIÓN
+// ===================================================
+function showToast(title, msg) {
+  const toast = document.createElement("div");
+  toast.className = "toast align-items-center text-bg-primary border-0 show position-fixed bottom-0 end-0 m-3";
+  toast.style.zIndex = "2000";
+  toast.innerHTML = `
+    <div class="d-flex">
+      <div class="toast-body">
+        <strong>${title}</strong><br>${msg}
+      </div>
+      <button type="button" class="btn-close btn-close-white me-2 m-auto" data-bs-dismiss="toast"></button>
+    </div>`;
+  document.body.appendChild(toast);
+  setTimeout(() => toast.remove(), 4000);
+}
+
+// ===================================================
+//  BOTONES EN LA FICHA
+// ===================================================
+const fichaBody = document.querySelector(".card-body");
+const btnGuardar = document.createElement("button");
+btnGuardar.className = "btn btn-outline-primary mt-2";
+btnGuardar.innerHTML = `<i class="bi bi-save"></i> Guardar cambios`;
+btnGuardar.onclick = guardarChecklist;
+
+const btnPDF = document.createElement("button");
+btnPDF.className = "btn btn-outline-secondary mt-2 ms-2";
+btnPDF.innerHTML = `<i class="bi bi-file-earmark-pdf"></i> Exportar PDF`;
+btnPDF.onclick = exportarPDF;
+
+document.addEventListener("DOMContentLoaded", () => {
+  const card = document.querySelector(".card-body");
+  if (card) card.append(btnGuardar, btnPDF);
+});
+</script>

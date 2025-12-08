@@ -1,0 +1,1483 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8" />
+<title>Pre-Inscripción – Policía Federal Argentina – Campaña 2027</title>
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet"/>
+<link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.css" rel="stylesheet"/>
+
+<style>
+  :root{
+    --pfa-azul:#0e2a50; --pfa-azul-2:#163a6f; --pfa-azul-3:#1d4b97;
+    --fx-neon:#3ad0ff; --fx-neon-2:#8dff9c; --fx-amber:#ffd54f;
+  }
+  html, body{ height:100%; }
+  body.fx{ min-height:100vh; }
+
+  .bg-video{ position:fixed; inset:0; width:100%; height:100%; object-fit:cover; z-index:-4; filter:blur(1.5px) brightness(0.9); }
+  .bg-overlay{ position:fixed; inset:0; z-index:-3; background:linear-gradient(180deg, rgba(0,0,0,.20), rgba(0,0,0,.10)); }
+  .bg-grid{ position:fixed; inset:0; z-index:-2; pointer-events:none; opacity:.22;
+    background:
+      linear-gradient(transparent 95%, rgba(255,255,255,.45) 96%, transparent 97%) 0 0/100% 28px,
+      linear-gradient(90deg, transparent 95%, rgba(255,255,255,.45) 96%, transparent 97%) 0 0/28px 100%;
+    animation:gridMove 22s linear infinite; }
+  @keyframes gridMove { 0%{transform:translateY(0)} 100%{transform:translateY(-28px)} }
+
+  .bg-aurora{
+    position:fixed; inset:0; z-index:-1; pointer-events:none;
+    mix-blend-mode: screen;
+    opacity: .9;
+  }
+  .bg-aurora::before,
+  .bg-aurora::after{
+    content:"";
+    position:absolute; inset:-18%;
+    filter: blur(60px);
+    background:
+      radial-gradient(35% 35% at 20% 30%, rgba(0,123,255,.45), transparent 65%),
+      radial-gradient(40% 40% at 80% 25%, rgba(3,169,244,.40), transparent 65%),
+      radial-gradient(30% 30% at 60% 80%, rgba(0,188,212,.35), transparent 65%),
+      radial-gradient(28% 28% at 30% 70%, rgba(33,150,243,.38), transparent 70%);
+    animation: auroraMove 16s ease-in-out infinite alternate;
+  }
+  .bg-aurora::after{
+    transform: scale(1.1) rotate(10deg);
+    opacity:.85;
+    animation-duration: 22s;
+  }
+  @keyframes auroraMove{
+    0%   { transform: translate(-2%, -2%); }
+    100% { transform: translate(2%, 2%); }
+  }
+
+  header{ position:sticky; top:0; z-index:10; color:#fff; background: rgba(14,42,80,.96);
+    box-shadow: 0 8px 18px rgba(0,0,0,.22); backdrop-filter: blur(4px);
+    padding: 22px 0; border-bottom: 3px solid rgba(255,255,255,.12); transition: padding .18s, background .18s, box-shadow .18s; }
+  header.shrink{ padding:10px 0; background: rgba(14,42,80,.98); box-shadow: 0 4px 16px rgba(0,0,0,.25); }
+
+  .header-inner{ display:flex; align-items:center; justify-content:space-between; gap:16px; }
+  .brand{ display:flex; align-items:center; gap:16px; }
+
+  .emblem{
+    position:relative; display:grid; place-items:center; border-radius:80%;
+    padding:10px; isolation:isolate;
+    --g1: rgba(58,208,255,.95);
+    --g2: rgba(141,255,156,.80);
+    --ring: rgba(58,208,255,.35);
+    --ring2: rgba(141,255,156,.25);
+  }
+  .emblem::before{
+    content:""; position:absolute; inset:-14px; border-radius:50%;
+    background:
+      radial-gradient(40% 40% at 50% 50%, var(--g1), transparent 70%),
+      radial-gradient(60% 60% at 55% 45%, var(--g2), transparent 75%);
+    filter: blur(16px);
+    opacity: .95;
+    z-index:-1;
+    animation: glowPulse 2.4s ease-in-out infinite;
+  }
+  .emblem::after{
+    content:""; position:absolute; inset:-6px; border-radius:50%;
+    background:
+      conic-gradient(from 0deg, var(--ring), var(--ring2), var(--ring));
+    filter: blur(10px);
+    opacity:.95;
+    z-index:-1;
+    animation: spinRing 6s linear infinite;
+  }
+
+  .brand img{
+    height:80px; width:auto; border-radius:50%;
+    box-shadow:
+      0 0 0 2px rgba(255,255,255,.35),
+      0 8px 24px rgba(0,0,0,.25),
+      0 0 22px rgba(58,208,255,.50),
+      0 0 36px rgba(141,255,156,.35);
+    transition: filter .2s ease, box-shadow .2s ease;
+  }
+  .brand img:hover{ filter: brightness(1.06); }
+
+  @keyframes glowPulse{
+    0%,100%{ transform:scale(1);   opacity:.95; filter:blur(14px); }
+    50%    { transform:scale(1.06); opacity:1;   filter:blur(18px); }
+  }
+  @keyframes spinRing{ to { transform: rotate(360deg);} }
+
+  .brand-title h1{ font-size:1.6rem; margin:0; }
+  .brand-title small{ opacity:.92; font-size:.98rem; }
+
+  .notice{ background:#0e2a50; color:#fff; border-radius:12px; padding:.8rem 1rem; font-size:.95rem; box-shadow:0 8px 18px rgba(14,42,80,.15); }
+
+  .card-glass{ background:rgba(255,255,255,.95); border:1px solid rgba(255,255,255,.75);
+    box-shadow:0 24px 50px rgba(0,0,0,.15); border-radius:16px; position:relative; overflow:hidden; }
+
+  .neon-primary{
+    --c1: var(--fx-neon); --c2: var(--fx-neon-2);
+    background: linear-gradient(90deg, var(--c1), var(--c2));
+    color:#06203e; border:0; font-weight:700;
+    box-shadow: 0 0 14px rgba(58,208,255,.55), 0 0 24px rgba(141,255,156,.35);
+  }
+  .neon-primary:hover{ filter: brightness(1.05); box-shadow: 0 0 18px rgba(58,208,255,.65), 0 0 28px rgba(141,255,156,.45); }
+  .neon-primary:focus{ outline: 3px solid var(--fx-amber); outline-offset:2px; }
+
+  .fx-divider{
+    position:absolute; left:0; right:0; top:0; height:8px;
+    background:
+      radial-gradient(70% 120% at 50% 50%, var(--fx-neon), transparent 70%) no-repeat,
+      radial-gradient(50% 120% at 50% 50%, var(--fx-neon-2), transparent 80%) no-repeat;
+    background-size: 120% 100%, 60% 100%;
+    background-position: -60% 0, -30% 0;
+    animation: sweepMask 3.5s linear infinite;
+    -webkit-mask: linear-gradient(0deg, rgba(0,0,0,0) 0, #000 25%, #000 75%, rgba(0,0,0,0) 100%);
+            mask: linear-gradient(0deg, rgba(0,0,0,0) 0, #000 25%, #000 75%, rgba(0,0,0,0) 100%);
+    will-change: background-position;
+  }
+  @keyframes sweepMask{ 0%{ background-position: -60% 0, -30% 0; } 100%{ background-position: 160% 0, 130% 0; } }
+
+  .title-wrap{ margin-top:.25rem; margin-bottom:1rem; text-align:center; }
+  .title-band{ display:inline-flex; flex-direction:column; align-items:center; gap:.5rem;
+    background:linear-gradient(90deg, rgba(14,42,80,.06), rgba(29,75,151,.08));
+    border:1px solid rgba(29,75,151,.18); border-radius:16px; padding:1rem 2rem; box-shadow:0 4px 12px rgba(0,0,0,.06); }
+  .title-text{ font-weight:800; color:var(--pfa-azul); font-size:1.7rem; }
+  .title-sub-strong{ font-weight:800; color:var(--pfa-azul); font-size:1.20rem; }
+  .title-sep{ display:block; width:56px; height:2px; margin:.5rem auto .4rem; border-radius:2px;
+    background:linear-gradient(90deg, var(--fx-neon), var(--fx-neon-2)); opacity:.9; }
+
+  .section-title{ font-weight:700; color:#1d3e73; margin-top:1rem; margin-bottom:.5rem; }
+  :focus{ outline:3px solid var(--fx-amber); outline-offset:2px; }
+
+  .esc-info{
+    background:rgba(255,255,255,.88);
+    border:1px solid #e8eef6;
+    border-radius:14px;
+    padding:14px;
+    box-shadow:0 8px 20px rgba(0,0,0,.06);
+    scroll-margin-top: 110px;
+  }
+  .esc-heading{ font-size:1rem; color:#163a6f; font-weight:800; margin:0 0 .35rem; }
+  .esc-item{ border:1px solid #e9eef6; border-radius:10px; padding:10px; margin-bottom:8px; background:#fff; display:flex; gap:.55rem; align-items:flex-start; }
+  .esc-icon{ font-size:1rem; color:#1d4b97; margin-top:.1rem; }
+  .esc-title{ font-weight:700; margin:0; color:#0e2a50; font-size:.92rem; }
+
+  #step2{ display:none; }
+  .fam-item{ border:1px dashed #cfd6df; border-radius:12px; padding:12px; margin-bottom:12px; background:#fff; }
+
+  .invalid-flash{ animation: flash-bg 1.2s ease-in-out 0s 2; border-color: #dc3545 !important; box-shadow: 0 0 0 .2rem rgba(220,53,69,.15) !important; }
+  .block-flash{ animation: flash-outline 1.2s ease-in-out 0s 2; }
+  @keyframes flash-bg{ 0%,100%{ background:#fff; } 50%{ background:#ffecec; } }
+  @keyframes flash-outline{ 0%,100%{ outline:none; } 50%{ outline:3px solid rgba(220,53,69,.35); outline-offset:2px; } }
+
+  #stepPills .nav-link.disabled { pointer-events: none; opacity: .6; }
+  #stepPills .nav-link.active { font-weight: 700; }
+
+  @media (max-width:576px){
+    .brand img{ height:56px; }
+    .brand-title h1{ font-size:1.08rem; }
+    .brand-title small{ display:none; }
+  }
+
+  .notice{
+    background: rgba(255,255,255,.95) !important;
+    color: var(--pfa-azul) !important;
+    border: 1px solid #e8eef6;
+    border-left: 6px solid var(--pfa-azul-3);
+  }
+  .esc-info, .card-glass,
+  .form-label, .form-text, .form-check-label,
+  .esc-heading, .esc-title {
+    color: var(--pfa-azul) !important;
+  }
+
+  .bg-pfa{ background-color: var(--pfa-azul); }
+</style>
+</head>
+<body class="fx">
+
+  <!-- Fondo -->
+  <video class="bg-video" autoplay muted loop playsinline>
+    <source src="Video Bandera.mp4" type="video/mp4">
+  </video>
+  <div class="bg-overlay"></div>
+  <div class="bg-grid"></div>
+  <div class="bg-aurora" aria-hidden="true"></div>
+
+  <!-- Header -->
+  <header id="siteHeader">
+    <div class="container header-inner">
+      <div class="brand">
+        <div class="emblem"><img src="Captura de pantalla 2025-09-07 185933.png" alt="Escudo PFA"/></div>
+        <div class="brand-title">
+          <h1>Policía Federal Argentina</h1>
+          <small>Sistema de Pre-Inscripción</small>
+        </div>
+      </div>
+      <nav class="d-flex gap-2">
+        <a href="#" 
+           class="btn btn-sm btn-outline-light" 
+           data-bs-toggle="modal" 
+           data-bs-target="#modalLogin">
+          Iniciar sesión
+        </a>
+        <button class="btn btn-sm neon-primary" data-bs-toggle="modal" data-bs-target="#modalRegistro">
+          ¿Necesitás Ayuda?
+        </button>
+      </nav>
+    </div>
+  </header>
+
+  <!-- Mensaje éxito consulta -->
+  <div class="container mt-3">
+    <div id="consultaExito" class="alert alert-success d-none text-center" role="alert" tabindex="-1">
+      Tu consulta fue enviada con éxito.
+    </div>
+  </div>
+
+  <!-- Modal de inicio de sesión -->
+  <div class="modal fade" id="modalLogin" tabindex="-1" aria-labelledby="loginLabel" aria-hidden="true">
+    <div class="modal-dialog">
+      <div class="modal-content bg-light text-dark rounded-3 shadow">
+        <div class="modal-header bg-pfa text-white">
+          <h5 class="modal-title" id="loginLabel">Iniciar sesión</h5>
+          <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Cerrar"></button>
+        </div>
+        <div class="modal-body">
+          <form id="formLogin">
+            <div class="mb-3">
+              <label for="usuario" class="form-label">Usuario</label>
+              <input type="text" class="form-control" id="usuario" placeholder="Ingrese su usuario" required>
+            </div>
+            <div class="mb-3">
+              <label for="contrasena" class="form-label">Contraseña</label>
+              <input type="password" class="form-control" id="contrasena" placeholder="Ingrese su contraseña" required>
+            </div>
+            <button type="submit" class="btn btn-primary w-100">Acceder</button>
+          </form>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Escalafones clickeables -->
+  <div class="container mt-4">
+    <div class="row justify-content-center">
+      <div class="col-12 col-xl-8">
+        <section class="esc-info">
+          <div class="d-flex align-items-center justify-content-between flex-wrap gap-2">
+            <div><h2 class="esc-heading mb-0">¿Querés conocer nuestros escalafones?</h2></div>
+            <button class="btn btn-sm btn-outline-primary esc-toggle" data-bs-toggle="collapse" data-bs-target="#escCollapse" aria-expanded="false" id="btnEsc">
+              <i class="bi bi-plus-lg me-1"></i><span>Mostrar escalafones</span>
+            </button>
+          </div>
+
+          <div class="collapse mt-3" id="escCollapse">
+            <div class="row g-3">
+              <!-- Oficiales / Cadetes -->
+              <div class="col-md-6">
+                <div class="esc-item">
+                  <i class="bi bi-shield-check esc-icon"></i>
+                  <div>
+                    <p class="esc-title mb-1">Oficiales / Cadetes</p>
+                    <div class="d-flex flex-column gap-2">
+                      <a href="oficiales-seguridad.html" class="btn btn-outline-primary btn-sm">Seguridad</a>
+                      <a href="oficiales-bomberos.html" class="btn btn-outline-primary btn-sm">Bomberos</a>
+                      <a href="oficiales-comunicaciones.html" class="btn btn-outline-primary btn-sm">Comunicaciones</a>
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              <!-- Suboficiales / Agentes -->
+              <div class="col-md-6">
+                <div class="esc-item">
+                  <i class="bi bi-shield-check esc-icon"></i>
+                  <div>
+                    <p class="esc-title mb-1">Suboficiales / Agentes</p>
+                    <div class="d-flex flex-column gap-2">
+                      <a href="agentes-seguridad.html" class="btn btn-outline-primary btn-sm">Seguridad</a>
+                      <a href="agentes-bomberos.html" class="btn btn-outline-primary btn-sm">Bomberos</a>
+                      <a href="agentes-comunicaciones.html" class="btn btn-outline-primary btn-sm">Comunicaciones</a>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div> <!-- row -->
+          </div> <!-- collapse -->
+        </section>
+      </div>
+    </div>
+  </div>
+
+  <!-- Aviso -->
+  <div class="container mt-4">
+    <div class="row justify-content-center">
+      <div class="col-12 col-xl-8">
+        <div class="notice" role="note">
+          <i class="bi bi-shield-lock"></i>
+          <strong>Importante:</strong> Todos los trámites para la incorporación a las filas de la
+          <strong>POLICÍA FEDERAL ARGENTINA</strong> son <strong>personales y gratuitos</strong>; en ningún caso se permitirá la intervención de <strong>gestores</strong>.
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Formulario -->
+  <main class="container my-4">
+    <div class="row justify-content-center">
+      <div class="col-12 col-lg-10 col-xl-8">
+        <div class="card-glass p-4 p-md-5">
+          <div class="fx-divider"></div>
+
+          <!-- Progreso -->
+          <div class="mb-3" aria-label="Progreso de pre-inscripción">
+            <ul class="nav nav-pills justify-content-center gap-2 small mb-2" id="stepPills" role="tablist">
+              <li class="nav-item" role="presentation">
+                <button class="nav-link active" id="pill-step1" type="button" aria-current="step" aria-selected="true">
+                  <span class="me-1">1</span> Paso 1
+                </button>
+              </li>
+              <li class="nav-item" role="presentation">
+                <button class="nav-link disabled" id="pill-step2" type="button" aria-selected="false" tabindex="-1" aria-disabled="true">
+                  <span class="me-1">2</span> Paso 2
+                </button>
+              </li>
+            </ul>
+            <div class="progress" style="height: 10px;">
+              <div id="progbar" class="progress-bar" role="progressbar"
+                  style="width: 50%;" aria-valuenow="50" aria-valuemin="0" aria-valuemax="100">
+                <span class="visually-hidden">Paso 1 de 2</span>
+              </div>
+            </div>
+          </div>
+
+          <div class="title-wrap">
+            <div class="title-band">
+              <div class="title-text">Formulario de Pre-Inscripción</div>
+              <span class="title-sep" aria-hidden="true"></span>
+              <div class="title-sub-strong">Campaña 2027</div>
+            </div>
+          </div>
+
+          <!-- PASO 1 -->
+          <section id="step1">
+            <div class="alert alert-warning small" role="alert">
+              <strong>Declaración Jurada:</strong> la información consignada reviste carácter de DDJJ. La
+              <strong>omisión o falsificación</strong> de datos podrá derivar en la <strong>desestimación y archivo del trámite</strong>.
+            </div>
+
+            <form id="formStep1" novalidate>
+              <div class="section-title">Documento</div>
+              <div class="row g-3">
+                <div class="col-md-4">
+                  <label for="dni" class="form-label">N.º de DNI <span class="text-danger">*</span></label>
+                  <input id="dni" class="form-control" required pattern="\d{7,8}" maxlength="8" inputmode="numeric">
+                  <div class="invalid-feedback">Ingresá un DNI válido (8 dígitos).</div>
+                </div>
+                <div class="col-md-4">
+                  <label for="ejemplar" class="form-label">Ejemplar <span class="text-danger">*</span></label>
+                  <select id="ejemplar" class="form-select" required>
+                    <option value="">Seleccioná…</option>
+                    <option>A</option><option>B</option><option>C</option><option>D</option>
+                    <option>E</option><option>F</option><option>G</option><option>H</option>
+                  </select>
+                  <div class="invalid-feedback">Seleccioná un ejemplar.</div>
+                </div>
+                <div class="col-md-4">
+                  <label for="tramite" class="form-label">
+                    N.º de Trámite <span class="text-danger">*</span>
+                    <button type="button" class="btn btn-sm btn-outline-primary ms-1 px-2 py-0"
+                            data-bs-toggle="modal" data-bs-target="#modalTramite" title="¿Dónde encuentro el N.º de trámite?">
+                      <i class="bi bi-info-lg"></i>
+                    </button>
+                  </label>
+                  <input id="tramite" class="form-control" required pattern="\d{6}" maxlength="6" inputmode="numeric">
+                  <div class="form-text">Colocá los últimos 6 digitos del número de trámite de tu DNI</div>
+                  <div class="invalid-feedback">Ingresá 6 dígitos.</div>
+                </div>
+              </div>
+
+              <div class="section-title">Datos personales</div>
+              <div class="row g-3">
+                <div class="col-md-4">
+                  <label for="nacimiento" class="form-label">Fecha de nacimiento <span class="text-danger">*</span></label>
+                  <input id="nacimiento" type="date" class="form-control" required min="1990-01-01" max="2008-12-31">
+                  <div class="form-text">Permitido: 01/01/1990 a 31/12/2008 (17–35 años al 31/12/2025).</div>
+                  <div class="invalid-feedback">Fuera del rango permitido.</div>
+                </div>
+                <div class="col-md-4">
+                  <label for="edad" class="form-label">Edad al 31/12/2025</label>
+                  <input id="edad" class="form-control" readonly>
+                </div>
+                <div class="col-md-4">
+                  <label for="cargo" class="form-label">Cargo al que se postula <span class="text-danger">*</span></label>
+                  <select id="cargo" class="form-select" required>
+                    <option value="">Seleccioná…</option>
+                    <optgroup label="Oficiales / Cadetes" id="grpCadete">
+                      <option value="cadete-seguridad">Seguridad (Cadetes)</option>
+                      <option value="cadete-bomberos">Bomberos (Cadetes)</option>
+                      <option value="cadete-comunicaciones">Comunicaciones (Cadetes)</option>
+                    </optgroup>
+                    <optgroup label="Suboficiales / Agentes" id="grpAgente">
+                      <option value="agente-seguridad">Seguridad (Agentes)</option>
+                      <option value="agente-bomberos">Bomberos (Agentes)</option>
+                      <option value="agente-comunicaciones">Comunicaciones (Agentes)</option>
+                    </optgroup>
+                  </select>
+                  <div id="cargoHelp" class="form-text"></div>
+                  <div class="invalid-feedback">Seleccioná un cargo.</div>
+                </div>
+              </div>
+
+              <div class="section-title">Contacto</div>
+              <div class="row g-3">
+                <div class="col-md-6">
+                  <label for="email" class="form-label">E-mail (solo Gmail/Hotmail) <span class="text-danger">*</span></label>
+                  <input id="email" type="email" class="form-control" required>
+                  <div class="form-text">Se admiten únicamente cuentas @gmail.com o @hotmail.com</div>
+                  <div class="invalid-feedback">Ingresá un e-mail válido de Gmail o Hotmail.</div>
+                </div>
+                <div class="col-md-6">
+                  <label for="email2" class="form-label">E-mail (verificación) <span class="text-danger">*</span></label>
+                  <input id="email2" type="email" class="form-control" required>
+                  <div class="invalid-feedback">Los correos deben coincidir y ser Gmail u Hotmail.</div>
+                </div>
+              </div>
+              <div class="section-title mt-4">Teléfonos de contacto</div>
+<div class="row g-3">
+  <div class="col-md-6">
+    <label for="telefono" class="form-label">
+      Teléfono principal <span class="text-danger">*</span>
+    </label>
+    <input id="telefono"
+           type="tel"
+           class="form-control"
+           inputmode="tel"
+           pattern="[0-9()+\-\\s]{8,20}"
+           required>
+    <div class="form-text">
+      Ej.: 11 1234 5678 o con característica completa.
+    </div>
+    <div class="invalid-feedback">
+      Ingresá un teléfono de contacto válido.
+    </div>
+  </div>
+
+  <div class="col-md-6">
+    <label for="telefono2" class="form-label">
+      Teléfono alternativo
+    </label>
+    <input id="telefono2"
+           type="tel"
+           class="form-control"
+           inputmode="tel"
+           pattern="[0-9()+\-\\s]{8,20}">
+    <div class="form-text">
+     Ingresá un número adicional (fijo o celular).
+    </div>
+    <div class="invalid-feedback">
+      Ingresá un teléfono válido.
+    </div>
+  </div>
+</div>
+
+              <div class="section-title">Antecedentes</div>
+              <div class="row g-3">
+                <div class="col-md-6">
+                  <label class="form-label">¿Prestaste servicio en otra fuerza (seguridad/armadas)? <span class="text-danger">*</span></label>
+                  <select id="otraFuerza" class="form-select" required>
+                    <option value="">Seleccioná…</option>
+                    <option value="no">No</option>
+                    <option value="si">Sí</option>
+                  </select>
+                  <div class="invalid-feedback">Indicá si prestaste servicio en otra fuerza.</div>
+                </div>
+                <div class="col-md-6 d-none" id="otraFuerzaDetalleWrap">
+                  <label class="form-label">Detalle (fuerza/fecha/jerarquía)</label>
+                  <input id="otraFuerzaDetalle" class="form-control" placeholder="Ej.: Policía Provincial, 2021-2023, Agente">
+                </div>
+              </div>
+
+              <div class="section-title">Verificación</div>
+              <div class="row g-3">
+                <div class="col-md-6">
+                  <label id="qLabel" for="captcha" class="form-label"></label>
+                  <input id="captcha" class="form-control" required inputmode="numeric">
+                  <div class="form-text">Respondé la suma para continuar.</div>
+                  <div class="invalid-feedback">Respuesta incorrecta.</div>
+                </div>
+              </div>
+
+              <div class="form-check mt-3">
+                <input id="acepto1" type="checkbox" class="form-check-input" required>
+                <label class="form-check-label" for="acepto1">Declaro que la información ingresada es verdadera y corresponde a mi último DNI.</label>
+                <div class="invalid-feedback">Debés aceptar la declaración.</div>
+              </div>
+
+              <div class="d-grid d-sm-flex gap-2 mt-4">
+                <button id="btnStep1" class="btn btn-lg neon-primary" type="submit">Continuar</button>
+              </div>
+              <p id="msg1" class="mt-3 fw-semibold" role="status" aria-live="polite"></p>
+            </form>
+          </section>
+
+          <!-- PASO 2 -->
+          <section id="step2">
+            <div class="alert alert-warning small" role="alert">
+              <strong>Declaración Jurada:</strong> la información consignada reviste carácter de DDJJ. La
+              <strong>omisión o falseamiento</strong> de datos podrá derivar en la <strong>desestimación y archivo del trámite</strong>.
+              <br><i class="bi bi-info-circle"></i> En caso de errores involuntarios en algún ítem, la situación se
+              tratará en <strong>División Incorporaciones</strong> al momento de la formalización.
+            </div>
+
+            <h3 class="h5 text-primary fw-bold mb-3">Paso 2 — Domicilios y Familiares / Convivientes</h3>
+
+            <!-- Domicilios -->
+            <div class="section-title">Domicilios</div>
+            <div class="row g-3 block-dom-dni">
+              <div class="col-12"><h6 class="mb-2">Según DNI</h6></div>
+              <div class="col-md-4">
+                <label class="form-label required" for="domDniCalle">Calle</label>
+                <input id="domDniCalle" class="form-control" required autocomplete="address-line1">
+              </div>
+              <div class="col-md-2">
+                <label class="form-label required" for="domDniAltura">Altura</label>
+                <input id="domDniAltura" class="form-control" required inputmode="numeric" pattern="\d{1,6}" maxlength="6" autocomplete="on">
+              </div>
+              <div class="col-md-3">
+                <label class="form-label" for="domDniPiso">Piso/Dpto</label>
+                <input id="domDniPiso" class="form-control" placeholder="Opcional" autocomplete="address-line2">
+              </div>
+              <div class="col-md-3">
+                <label class="form-label required" for="domDniCP">Código Postal</label>
+                <input id="domDniCP" class="form-control" required autocomplete="postal-code">
+              </div>
+              <div class="col-md-4">
+                <label class="form-label required" for="domDniLocalidad">Localidad</label>
+                <input id="domDniLocalidad" class="form-control" required autocomplete="address-level2">
+              </div>
+              <div class="col-md-4">
+                <label class="form-label required" for="domDniProvincia">Provincia</label>
+                <input id="domDniProvincia" class="form-control" required autocomplete="address-level1">
+              </div>
+              <div class="col-md-4">
+                <label class="form-label required" for="domDniPais">País</label>
+                <input id="domDniPais" class="form-control" required list="paises" autocomplete="country-name">
+              </div>
+            </div>
+
+            <div class="form-check form-switch my-3">
+              <input class="form-check-input" type="checkbox" id="sameAddress">
+              <label class="form-check-label" for="sameAddress">TILDÁ ESTA OPCIÓN SI TU DOMICILIO ES EL MISMO QUE EL DEL DNI</label>
+            </div>
+
+            <div class="row g-3 block-dom-act">
+              <div class="col-12"><h6 class="mb-2">Domicilio actual</h6></div>
+              <div class="col-md-4">
+                <label class="form-label required" for="domActCalle">Calle</label>
+                <input id="domActCalle" class="form-control" required autocomplete="address-line1">
+              </div>
+              <div class="col-md-2">
+                <label class="form-label required" for="domActAltura">Altura</label>
+                <input id="domActAltura" class="form-control" required inputmode="numeric" pattern="\d{1,6}" maxlength="6" autocomplete="on">
+              </div>
+              <div class="col-md-3">
+                <label class="form-label" for="domActPiso">Piso/Dpto</label>
+                <input id="domActPiso" class="form-control" placeholder="Opcional" autocomplete="address-line2">
+              </div>
+              <div class="col-md-3">
+                <label class="form-label required" for="domActCP">Código Postal</label>
+                <input id="domActCP" class="form-control" required autocomplete="postal-code">
+              </div>
+              <div class="col-md-4">
+                <label class="form-label required" for="domActLocalidad">Localidad</label>
+                <input id="domActLocalidad" class="form-control" required autocomplete="address-level2">
+              </div>
+              <div class="col-md-4">
+                <label class="form-label required" for="domActProvincia">Provincia</label>
+                <input id="domActProvincia" class="form-control" required autocomplete="address-level1">
+              </div>
+              <div class="col-md-4">
+                <label class="form-label required" for="domActPais">País</label>
+                <input id="domActPais" class="form-control" required list="paises" autocomplete="country-name">
+              </div>
+            </div>
+
+            <!-- Familiares -->
+            <div class="section-title mt-4">Familiares y Convivientes</div>
+            <p class="text-muted small">Informá familiares <strong>directos</strong> y/o <strong>convivientes</strong>. Si <strong>no conviven</strong>, indicá su <strong>domicilio</strong>. Sumá <strong>ocupación</strong>, <strong>¿Trabajó en PFA?</strong> y, de corresponder, <strong>discapacidad</strong> (opcional).</p>
+
+            <!-- Padre -->
+            <div class="mb-3">
+              <div class="d-flex justify-content-between align-items-center mb-2">
+                <h6 class="mb-0">Padre (único)</h6>
+                <div class="form-check"><input class="form-check-input" type="checkbox" id="nonePadre"><label class="form-check-label" for="nonePadre">No corresponde</label></div>
+              </div>
+              <div id="blkPadre" class="fam-item">
+                <div class="row g-2 align-items-end">
+                  <div class="col-md-5"><label class="form-label required">Nombre y apellido</label><input class="form-control padre-nombre" required autocomplete="name"></div>
+                  <div class="col-md-3"><label class="form-label required">Documento</label><input class="form-control padre-doc" required inputmode="numeric" pattern="\d{6,12}" maxlength="12" autocomplete="off"></div>
+                  <div class="col-md-2"><label class="form-label required">¿Vive?</label><select class="form-select padre-vive" required><option value="">Seleccioná…</option><option value="si">Sí</option><option value="no">No</option></select></div>
+                  <div class="col-md-2"><label class="form-label required">¿Convive?</label><select class="form-select padre-convive" required><option value="">Seleccioná…</option><option value="si">Sí</option><option value="no">No</option></select></div>
+
+                  <div class="col-md-3"><label class="form-label required">Estado civil</label>
+                    <select class="form-select padre-ecivil" required>
+                      <option value="">Seleccioná…</option>
+                      <option>Soltero/a</option><option>Casado/a</option><option>Divorciado/a</option><option>Viudo/a</option><option>Unión convivencial</option>
+                    </select>
+                  </div>
+                  <div class="col-md-3"><label class="form-label required">Nacionalidad</label><input class="form-control padre-nacionalidad" required list="paises" autocomplete="country-name"></div>
+                  <div class="col-md-3">
+                    <label class="form-label" for="padre-padre">Nombre y Apellido del padre</label>
+                    <input id="padre-padre" class="form-control padre-padre" placeholder="Ej: Juan Pérez">
+                  </div>
+                  <div class="col-md-3">
+                    <label class="form-label" for="padre-madre">Nombre y Apellido de la madre</label>
+                    <input id="padre-madre" class="form-control padre-madre" placeholder="Ej: María Gómez">
+                  </div>
+
+                  <div class="col-md-4"><label class="form-label">Ocupación</label><input class="form-control padre-ocup" placeholder="Ej.: Empleado, Jubilado"></div>
+                  <div class="col-md-4">
+                    <label class="form-label required">¿Trabajó en PFA?</label>
+                    <select class="form-select padre-pfa" required>
+                      <option value="">Seleccioná…</option>
+                      <option value="si">Sí</option>
+                      <option value="no">No</option>
+                    </select>
+                  </div>
+                  <div class="col-md-4"><label class="form-label">¿Posee discapacidad?</label>
+                    <select class="form-select padre-disc">
+                      <option value="">Prefiero no responder</option>
+                      <option value="no">No</option>
+                      <option value="si">Sí</option>
+                    </select>
+                  </div>
+                  <div class="col-md-4 d-none padre-disc-det-wrap"><label class="form-label">Detalle (opcional)</label><input class="form-control padre-disc-det" placeholder="Ej.: motriz, visual, etc."></div>
+
+                  <div class="col-12 padre-addr d-none">
+                    <div class="row g-2 mt-1">
+                      <div class="col-md-6"><label class="form-label required">Domicilio</label><input class="form-control padre-dir" autocomplete="address-line1"></div>
+                      <div class="col-md-3"><label class="form-label required">Localidad</label><input class="form-control padre-loc" autocomplete="address-level2"></div>
+                      <div class="col-md-3"><label class="form-label required">Provincia/Estado</label><input class="form-control padre-prov" autocomplete="address-level1"></div>
+                      <div class="col-md-3"><label class="form-label required">País</label><input class="form-control padre-pais" list="paises" autocomplete="country-name"></div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <!-- Madre / Tutor -->
+            <div class="mb-3">
+              <div class="d-flex justify-content-between align-items-center mb-2">
+                <h6 class="mb-0">Madre / Tutor (único)</h6>
+                <div class="form-check"><input class="form-check-input" type="checkbox" id="noneMadre"><label class="form-check-label" for="noneMadre">No corresponde</label></div>
+              </div>
+              <div id="blkMadre" class="fam-item">
+                <div class="row g-2 align-items-end">
+                  <div class="col-md-5"><label class="form-label required">Nombre y apellido</label><input class="form-control madre-nombre" required autocomplete="name"></div>
+                  <div class="col-md-3"><label class="form-label required">Documento</label><input class="form-control madre-doc" required inputmode="numeric" pattern="\d{6,12}" maxlength="12" autocomplete="off"></div>
+                  <div class="col-md-2"><label class="form-label required">¿Vive?</label><select class="form-select madre-vive" required><option value="">Seleccioná…</option><option value="si">Sí</option><option value="no">No</option></select></div>
+                  <div class="col-md-2"><label class="form-label required">¿Convive?</label><select class="form-select madre-convive" required><option value="">Seleccioná…</option><option value="si">Sí</option><option value="no">No</option></select></div>
+
+                  <div class="col-md-3"><label class="form-label required">Estado civil</label>
+                    <select class="form-select madre-ecivil" required>
+                      <option value="">Seleccioná…</option>
+                      <option>Soltero/a</option><option>Casado/a</option><option>Divorciado/a</option><option>Viudo/a</option><option>Unión convivencial</option>
+                    </select>
+                  </div>
+                  <div class="col-md-3"><label class="form-label required">Nacionalidad</label><input class="form-control madre-nacionalidad" required list="paises" autocomplete="country-name"></div>
+                  <div class="col-md-3">
+                    <label class="form-label" for="madre-padre">Nombre y Apellido del padre</label>
+                    <input id="madre-padre" class="form-control madre-padre" placeholder="Ej: Juan Pérez">
+                  </div>
+                  <div class="col-md-3">
+                    <label class="form-label" for="madre-madre">Nombre y Apellido de la madre</label>
+                    <input id="madre-madre" class="form-control madre-madre" placeholder="Ej: María Gómez">
+                  </div>
+
+                  <div class="col-md-4"><label class="form-label">Ocupación</label><input class="form-control madre-ocup" placeholder="Ej.: Empleada, Jubilada"></div>
+                  <div class="col-md-4">
+                    <label class="form-label required">¿Trabajó en PFA?</label>
+                    <select class="form-select madre-pfa" required>
+                      <option value="">Seleccioná…</option>
+                      <option value="si">Sí</option>
+                      <option value="no">No</option>
+                    </select>
+                  </div>
+                  <div class="col-md-4"><label class="form-label">¿Posee discapacidad?</label>
+                    <select class="form-select madre-disc">
+                      <option value="">Prefiero no responder</option>
+                      <option value="no">No</option>
+                      <option value="si">Sí</option>
+                    </select>
+                  </div>
+                  <div class="col-md-4 d-none madre-disc-det-wrap"><label class="form-label">Detalle (opcional)</label><input class="form-control madre-disc-det" placeholder="Ej.: motriz, visual, etc."></div>
+
+                  <div class="col-12 madre-addr d-none">
+                    <div class="row g-2 mt-1">
+                      <div class="col-md-6"><label class="form-label required">Domicilio</label><input class="form-control madre-dir" autocomplete="address-line1"></div>
+                      <div class="col-md-3"><label class="form-label required">Localidad</label><input class="form-control madre-loc" autocomplete="address-level2"></div>
+                      <div class="col-md-3"><label class="form-label required">Provincia/Estado</label><input class="form-control madre-prov" autocomplete="address-level1"></div>
+                      <div class="col-md-3"><label class="form-label required">País</label><input class="form-control madre-pais" list="paises" autocomplete="country-name"></div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <!-- Cónyuge / Pareja / Ex -->
+            <div class="mb-3">
+              <div class="d-flex justify-content-between align-items-center mb-2">
+                <h6 class="mb-0">Cónyuge / Pareja / Ex (padre/madre de hijos)</h6>
+                <div class="form-check"><input class="form-check-input fam-none" type="checkbox" id="nonePareja" data-target="listPareja"><label class="form-check-label" for="nonePareja">No tengo</label></div>
+              </div>
+              <div id="listPareja"></div>
+              <button type="button" class="btn btn-outline-primary btn-sm" data-add="listPareja">Agregar registro</button>
+            </div>
+
+            <!-- Hijos -->
+            <div class="mb-3">
+              <div class="d-flex justify-content-between align-items-center mb-2">
+                <h6 class="mb-0">Hijos</h6>
+                <div class="form-check"><input class="form-check-input fam-none" type="checkbox" id="noneHijos" data-target="listHijos"><label class="form-check-label" for="noneHijos">No tengo</label></div>
+              </div>
+              <div id="listHijos"></div>
+              <button type="button" class="btn btn-outline-primary btn-sm" data-add="listHijos">Agregar hijo/a</button>
+            </div>
+
+            <!-- Hermanos -->
+            <div class="mb-3">
+              <div class="d-flex justify-content-between align-items-center mb-2">
+                <h6 class="mb-0">Hermanos</h6>
+                <div class="form-check"><input class="form-check-input fam-none" type="checkbox" id="noneHermanos" data-target="listHermanos"><label class="form-check-label" for="noneHermanos">No tengo</label></div>
+              </div>
+              <div id="listHermanos"></div>
+              <button type="button" class="btn btn-outline-primary btn-sm" data-add="listHermanos">Agregar hermano/a</button>
+            </div>
+
+            <!-- Otro -->
+            <div class="mb-2">
+              <div class="d-flex justify-content-between align-items-center mb-2">
+                <h6 class="mb-0">Otro familiar / conviviente</h6>
+                <div class="form-check"><input class="form-check-input fam-none" type="checkbox" id="noneOtros" data-target="listOtros"><label class="form-check-label" for="noneOtros">No tengo</label></div>
+              </div>
+              <div id="listOtros"></div>
+              <button type="button" class="btn btn-outline-primary btn-sm" data-add="listOtros">Agregar otro</button>
+            </div>
+
+            <div class="form-check mt-3">
+              <input class="form-check-input" type="checkbox" id="acepto2" required>
+              <label class="form-check-label" for="acepto2">Declaro haber informado a todos mis familiares directos y convivientes.</label>
+            </div>
+
+            <div class="d-grid d-sm-flex gap-2 mt-4">
+              <button type="button" class="btn btn-outline-secondary btn-lg" id="btnVolver">Volver al Paso 1</button>
+              <button type="button" class="btn btn-lg neon-primary" id="btnEnviarFinal">Enviar pre-inscripción</button>
+            </div>
+            <p id="msg2" class="mt-3 fw-semibold" role="status" aria-live="polite"></p>
+          </section>
+        </div>
+      </div>
+    </div>
+  </main>
+
+  <!-- Datalist países -->
+  <datalist id="paises">
+    <option value="Argentina"></option><option value="Uruguay"></option><option value="Brasil"></option>
+    <option value="Chile"></option><option value="Paraguay"></option><option value="Bolivia"></option>
+    <option value="Perú"></option><option value="España"></option><option value="Italia"></option>
+    <option value="Francia"></option><option value="Alemania"></option><option value="Portugal"></option>
+    <option value="Estados Unidos"></option><option value="Canadá"></option><option value="México"></option>
+    <option value="Colombia"></option><option value="Venezuela"></option><option value="Ecuador"></option>
+    <option value="Guatemala"></option><option value="Honduras"></option><option value="El Salvador"></option>
+    <option value="Nicaragua"></option><option value="Costa Rica"></option><option value="Panamá"></option>
+    <option value="Cuba"></option><option value="República Dominicana"></option><option value="Puerto Rico"></option>
+    <option value="Reino Unido"></option><option value="Irlanda"></option><option value="Suecia"></option>
+    <option value="Noruega"></option><option value="Dinamarca"></option><option value="Finlandia"></option>
+    <option value="Países Bajos"></option><option value="Bélgica"></option><option value="Suiza"></option>
+    <option value="Austria"></option><option value="Grecia"></option><option value="Polonia"></option>
+    <option value="Hungría"></option><option value="Rumania"></option><option value="Chequia"></option>
+    <option value="Eslovaquia"></option><option value="Eslovenia"></option><option value="Croacia"></option>
+    <option value="Serbia"></option><option value="Ucrania"></option><option value="Rusia"></option>
+    <option value="Turquía"></option><option value="Marruecos"></option><option value="Argelia"></option>
+    <option value="Túnez"></option><option value="Egipto"></option><option value="Sudáfrica"></option>
+    <option value="Nigeria"></option><option value="Etiopía"></option><option value="India"></option>
+    <option value="Pakistán"></option><option value="Bangladés"></option><option value="China"></option>
+    <option value="Japón"></option><option value="Corea del Sur"></option><option value="Filipinas"></option>
+    <option value="Indonesia"></option><option value="Australia"></option><option value="Nueva Zelanda"></option>
+  </datalist>
+
+  <!-- Modal ayuda N.º de trámite -->
+  <div class="modal fade" id="modalTramite" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-lg modal-dialog-centered">
+      <div class="modal-content">
+        <div class="modal-header"><h5 class="modal-title">¿Dónde encuentro el N.º de Trámite?</h5><button class="btn-close" data-bs-dismiss="modal" aria-label="Cerrar"></button></div>
+        <div class="modal-body">
+          <p>El N.º de Trámite (6 dígitos para este formulario) figura en tu DNI, en el frente o dorso según versión.</p>
+          <div class="ratio ratio-16x9 mb-3">
+            <video controls preload="metadata" poster="Número de Trámite DNI - Instrucciones.png" onerror="this.closest('.ratio').style.display='none'">
+              <source src="Video DNI.mp4" type="video/mp4">
+            </video>
+          </div>
+          <img src="Número de Trámite DNI - Instrucciones.png" class="img-fluid rounded border" alt="Ejemplo de DNI indicando el N.º de Trámite" onerror="this.style.display='none'">
+        </div>
+        <div class="modal-footer"><button class="btn neon-primary" data-bs-dismiss="modal">Entendido</button></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Modal Registro (ayuda) -->
+  <div class="modal fade" id="modalRegistro" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h5 class="modal-title">Registro de cuenta</h5>
+          <button class="btn-close" data-bs-dismiss="modal" aria-label="Cerrar"></button>
+        </div>
+        <div class="modal-body">
+          <p class="mb-2">Para crear tu usuario primero debés completar la <strong>Pre-Inscripción</strong>.</p>
+          <ol class="small mb-3">
+            <li><strong>Paso 1:</strong> Completá y enviá el formulario de pre-inscripción.</li>
+            <li><strong>Paso 2:</strong> Revisá tu e-mail y activá tu cuenta desde el enlace recibido.</li>
+            <li><strong>Paso 3:</strong> Volvé e iniciá sesión con tu usuario.</li>
+          </ol>
+          <div class="alert alert-info small" role="alert"><i class="bi bi-info-circle me-1"></i> Si ya hiciste la pre-inscripción, revisá tu correo (bandeja de entrada y spam).</div>
+        </div>
+        <div class="modal-footer">
+          <button class="btn neon-primary" type="button"
+                  data-bs-dismiss="modal"
+                  data-bs-toggle="modal"
+                  data-bs-target="#modalConsulta">
+            Enviá tu Consulta
+          </button>
+          <button class="btn btn-outline-secondary" data-bs-dismiss="modal">Cerrar</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Modal Consulta (una por aspirante) -->
+  <div class="modal fade" id="modalConsulta" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+      <div class="modal-content">
+        <div class="modal-header bg-pfa text-white">
+          <h5 class="modal-title">Enviá tu consulta</h5>
+          <button class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Cerrar"></button>
+        </div>
+        <div class="modal-body">
+          <form id="formConsulta" novalidate>
+            <!-- Aviso si el aspirante ya tiene una consulta activa -->
+            <div id="consultaBloqueada" class="alert alert-warning d-none" role="alert">
+              Ya registraste una consulta que se encuentra en proceso.
+              Hasta que no sea respondida, no podrás generar una nueva.
+            </div>
+
+            <div class="mb-3">
+              <label for="consultaNombre" class="form-label">Nombre completo</label>
+              <input type="text" class="form-control" id="consultaNombre" required>
+              <div class="invalid-feedback">Ingresá tu nombre completo.</div>
+            </div>
+            <div class="mb-3">
+              <label for="consultaTel" class="form-label">Teléfono</label>
+              <input type="tel" class="form-control" id="consultaTel" required>
+              <div class="invalid-feedback">Ingresá un teléfono de contacto.</div>
+            </div>
+            <div class="mb-3">
+              <label for="consultaMail" class="form-label">E-mail</label>
+              <input type="email" class="form-control" id="consultaMail" required>
+              <div class="invalid-feedback">Ingresá un e-mail válido.</div>
+            </div>
+            <div class="mb-3">
+              <label for="consultaTexto" class="form-label">Consulta</label>
+              <textarea id="consultaTexto" class="form-control" rows="4" required></textarea>
+              <div class="invalid-feedback">Ingresá el detalle de tu consulta.</div>
+            </div>
+            <div class="d-flex justify-content-end gap-2">
+              <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">Cancelar</button>
+              <button type="submit" class="btn neon-primary">Enviar consulta</button>
+            </div>
+          </form>
+        </div>
+      </div>
+    </div>
+  </div>
+
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+<script>
+  // Header shrink
+  const header = document.getElementById('siteHeader');
+  window.addEventListener('scroll', ()=>{ if(window.scrollY>56) header.classList.add('shrink'); else header.classList.remove('shrink'); });
+
+  // Escalafones toggle text/icon + scroll
+  const btnEsc = document.getElementById('btnEsc');
+  const escCollapse = document.getElementById('escCollapse');
+  const escSection = document.querySelector('.esc-info');
+  if (escCollapse) {
+    escCollapse.addEventListener('shown.bs.collapse', ()=>{
+      btnEsc.querySelector('span').textContent='Ocultar escalafones';
+      btnEsc.querySelector('i').className='bi bi-dash-lg me-1';
+      btnEsc.setAttribute('aria-expanded','true');
+    });
+    escCollapse.addEventListener('hidden.bs.collapse', ()=>{
+      btnEsc.querySelector('span').textContent='Mostrar escalafones';
+      btnEsc.querySelector('i').className='bi bi-plus-lg me-1';
+      btnEsc.setAttribute('aria-expanded','false');
+      escSection?.scrollIntoView({ behavior:'smooth', block:'start' });
+    });
+  }
+
+  function flash(el){ if(!el) return; el.classList.add('invalid-flash'); setTimeout(()=>el.classList.remove('invalid-flash'), 1400); }
+  function flashBlock(el){ if(!el) return; el.classList.add('block-flash'); setTimeout(()=>el.classList.remove('block-flash'), 1400); }
+
+  // Progreso
+  function setProgress(step){
+    const prog = document.getElementById('progbar');
+    const pill1 = document.getElementById('pill-step1');
+    const pill2 = document.getElementById('pill-step2');
+    if(step === 1){
+      prog.style.width = '50%'; prog.setAttribute('aria-valuenow','50');
+      prog.querySelector('.visually-hidden')?.replaceChildren(document.createTextNode('Paso 1 de 2'));
+      pill1.classList.add('active'); pill1.setAttribute('aria-current','step'); pill1.setAttribute('aria-selected','true');
+      pill2.classList.remove('active'); pill2.classList.add('disabled'); pill2.removeAttribute('aria-current');
+      pill2.setAttribute('aria-selected','false'); pill2.setAttribute('aria-disabled','true');
+    } else {
+      prog.style.width = '100%'; prog.setAttribute('aria-valuenow','100');
+      prog.querySelector('.visually-hidden')?.replaceChildren(document.createTextNode('Paso 2 de 2'));
+      pill1.classList.remove('active'); pill1.removeAttribute('aria-current'); pill1.setAttribute('aria-selected','false');
+      pill2.classList.remove('disabled'); pill2.classList.add('active'); pill2.setAttribute('aria-current','step');
+      pill2.setAttribute('aria-selected','true'); pill2.removeAttribute('aria-disabled');
+    }
+  }
+  function goToStep(step){
+    const step1 = document.getElementById('step1');
+    const step2 = document.getElementById('step2');
+    if(step === 1){ step1.style.display='block'; step2.style.display='none'; }
+    else { step1.style.display='none'; step2.style.display='block'; }
+    setProgress(step);
+    window.scrollTo({top:0, behavior:'smooth'});
+  }
+  document.addEventListener('DOMContentLoaded', ()=> setProgress(1));
+
+  // -------- Validaciones Paso 1 ----------
+  const dni = document.getElementById('dni');
+  const tramite = document.getElementById('tramite');
+  const nac = document.getElementById('nacimiento');
+  const edad = document.getElementById('edad');
+  const email = document.getElementById('email');
+  const email2 = document.getElementById('email2');
+  const captcha = document.getElementById('captcha');
+  const qLabel = document.getElementById('qLabel');
+  const cargo = document.getElementById('cargo');
+  const grpAgente = document.getElementById('grpAgente');
+  const grpCadete = document.getElementById('grpCadete');
+  const cargoHelp = document.getElementById('cargoHelp');
+  const otraFuerza = document.getElementById('otraFuerza');
+  const otraFuerzaDetalleWrap = document.getElementById('otraFuerzaDetalleWrap');
+  const otraFuerzaDetalle = document.getElementById('otraFuerzaDetalle');
+
+  const ejemplar = document.getElementById('ejemplar');
+  const telPrincipal = document.getElementById('telefono');
+  const telAlternativo = document.getElementById('telefono2');
+
+  function digitsOnly(el, max){ el.value = el.value.replace(/\D+/g,'').slice(0,max); }
+  dni.addEventListener('input', ()=>digitsOnly(dni,8));
+  tramite.addEventListener('input', ()=>digitsOnly(tramite,6));
+
+  function emailDomainOK(v){
+    if(!v) return false;
+    const norm = v.trim().toLowerCase();
+    return norm.endsWith('@gmail.com') || norm.endsWith('@hotmail.com');
+  }
+  function validarEmails(){
+    let ok1 = emailDomainOK(email.value);
+    let ok2 = emailDomainOK(email2.value);
+    if(!ok1){ email.setCustomValidity('Solo Gmail o Hotmail'); } else { email.setCustomValidity(''); }
+    if(!ok2){ email2.setCustomValidity('Solo Gmail o Hotmail'); } else { email2.setCustomValidity(''); }
+    if(email.value && email2.value && (email.value.trim().toLowerCase() !== email2.value.trim().toLowerCase())){
+      email2.setCustomValidity('No coincide');
+    }
+  }
+  email.addEventListener('input', validarEmails);
+  email2.addEventListener('input', validarEmails);
+
+  otraFuerza.addEventListener('change', ()=>{
+    const show = otraFuerza.value === 'si';
+    otraFuerzaDetalleWrap.classList.toggle('d-none', !show);
+    if(show){ otraFuerzaDetalle.setAttribute('required','required'); }
+    else { otraFuerzaDetalle.removeAttribute('required'); otraFuerzaDetalle.value=''; }
+  });
+
+  function calcEdad(){
+    if(!nac.value){ edad.value=''; nac.setCustomValidity(''); toggleCargo(null); return; }
+    const f = new Date(nac.value+"T00:00:00");
+    const corte = new Date("2025-12-31T00:00:00");
+    let e = corte.getFullYear()-f.getFullYear();
+    const m = corte.getMonth()-f.getMonth();
+    if(m<0 || (m===0 && corte.getDate()<f.getDate())) e--;
+    edad.value = Number.isFinite(e)? e+" años" : '';
+    if(!Number.isFinite(e) || e<17 || e>35){ nac.setCustomValidity('Fuera del rango permitido'); }
+    else { nac.setCustomValidity(''); }
+    toggleCargo(e);
+  }
+
+  function toggleCargo(edadNum){
+    const cadeteOpts = Array.from(grpCadete.querySelectorAll('option'));
+    const agenteOpts = Array.from(grpAgente.querySelectorAll('option'));
+    if (edadNum === null){
+      cadeteOpts.forEach(o=>o.disabled=false);
+      agenteOpts.forEach(o=>o.disabled=false);
+      cargoHelp.textContent=''; cargoHelp.className='form-text'; return;
+    }
+    if (edadNum > 25){
+      cadeteOpts.forEach(o=>o.disabled=true);
+      agenteOpts.forEach(o=>o.disabled=false);
+      if (grpCadete.contains(cargo.selectedOptions[0])) { cargo.value=''; }
+      cargoHelp.textContent = 'Si tenés más de 25 años, solo podés postularte como Agente (edad máxima de inscripción: 35).';
+      cargoHelp.className = 'form-text text-warning fw-semibold';
+    } else {
+      cadeteOpts.forEach(o=>o.disabled=false);
+      agenteOpts.forEach(o=>o.disabled=false);
+      cargoHelp.textContent=''; cargoHelp.className='form-text';
+    }
+  }
+
+  nac.addEventListener('change', calcEdad); nac.addEventListener('input', calcEdad);
+
+  function nuevaPregunta(){
+    const a = Math.floor(1+Math.random()*9), b = Math.floor(1+Math.random()*9);
+    qLabel.textContent = `¿Cuánto es ${a} + ${b}?`; qLabel.dataset.respuesta = String(a+b); captcha.value='';
+  }
+  nuevaPregunta();
+  captcha.addEventListener('input', ()=>captcha.setCustomValidity(''));
+  captcha.addEventListener('blur', ()=>{
+    const esperado = parseInt(qLabel.dataset.respuesta,10);
+    const valor = parseInt((captcha.value||'').trim(),10);
+    if(Number.isNaN(valor) || valor !== esperado){ captcha.setCustomValidity('Incorrecto'); }
+    else { captcha.setCustomValidity(''); }
+  });
+
+  const form = document.getElementById('formStep1');
+  const msg1 = document.getElementById('msg1');
+
+  form.addEventListener('submit', (e)=>{
+    e.preventDefault(); msg1.textContent='';
+    calcEdad(); validarEmails();
+
+    const esperado = parseInt(qLabel.dataset.respuesta,10);
+    const valor = parseInt((captcha.value||'').trim(),10);
+    if(Number.isNaN(valor) || valor !== esperado){ captcha.setCustomValidity('Incorrecto'); } else { captcha.setCustomValidity(''); }
+
+    if(!form.checkValidity()){
+      form.classList.add('was-validated');
+      msg1.className='mt-3 fw-semibold text-danger';
+      msg1.textContent='Revisá los campos marcados.';
+      const firstInvalid = form.querySelector(':invalid'); if(firstInvalid){ flash(firstInvalid); firstInvalid.scrollIntoView({behavior:'smooth', block:'center'}); }
+      if(captcha.validationMessage){ nuevaPregunta(); }
+      return;
+    }
+    goToStep(2);
+  });
+
+  // -------- Paso 2 ----------
+  const same = document.getElementById('sameAddress');
+  const fields = name => ({
+    calle:  document.getElementById(name+'Calle'),
+    altura: document.getElementById(name+'Altura'),
+    piso:   document.getElementById(name+'Piso'),
+    cp:     document.getElementById(name+'CP'),
+    loc:    document.getElementById(name+'Localidad'),
+    prov:   document.getElementById(name+'Provincia'),
+    pais:   document.getElementById(name+'Pais'),
+  });
+  const domDni = fields('domDni'), domAct = fields('domAct');
+
+  function copyAddress(){
+    const on = same.checked;
+    for (const k of ['calle','altura','piso','cp','loc','prov','pais']){
+      domAct[k].value = on ? domDni[k].value : domAct[k].value;
+      domAct[k].readOnly = on;
+    }
+  }
+  same.addEventListener('change', copyAddress);
+  Object.values(domDni).forEach(el => el.addEventListener('input', () => { if (same.checked) copyAddress(); }));
+
+  ['domDniAltura','domActAltura'].forEach(id=>{
+    const el = document.getElementById(id);
+    el?.addEventListener('input', ()=>{ el.value = el.value.replace(/\D+/g,'').slice(0,6); });
+  });
+
+  function bindUnique(prefix){
+    const selConvive = document.querySelector(`.${prefix}-convive`);
+    const addrBlock  = document.querySelector(`.${prefix}-addr`);
+    function toggleAddr(){
+      const show = selConvive.value === 'no';
+      addrBlock.classList.toggle('d-none', !show);
+      addrBlock.querySelectorAll('input').forEach(inp=>{
+        if (show){ inp.setAttribute('required','required'); }
+        else { inp.removeAttribute('required'); inp.value=''; }
+      });
+    }
+    selConvive.addEventListener('change', toggleAddr);
+
+    const selDisc = document.querySelector(`.${prefix}-disc`);
+    const detWrap = document.querySelector(`.${prefix}-disc-det-wrap`);
+    if(selDisc && detWrap){
+      selDisc.addEventListener('change', ()=>{
+        const show = selDisc.value === 'si';
+        detWrap.classList.toggle('d-none', !show);
+        const det = detWrap.querySelector('input');
+        if(show){ det.removeAttribute('disabled'); }
+        else { det.value=''; det.setAttribute('disabled','disabled'); }
+      });
+    }
+  }
+  bindUnique('padre'); bindUnique('madre');
+
+  const famTemplate = (withVinculo=false) => `
+    <div class="fam-item">
+      <div class="row g-2 align-items-end">
+        ${withVinculo ? `
+          <div class="col-md-3">
+            <label class="form-label required">Vínculo</label>
+            <select class="form-select fam-vinculo" required>
+              <option value="">Seleccioná…</option>
+              <option>Hermano/a</option>
+              <option>Hermanastro/a</option>
+            </select>
+          </div>` : ``}
+        <div class="${withVinculo ? 'col-md-4' : 'col-md-5'}"><label class="form-label required">Nombre y apellido</label><input class="form-control fam-nombre" required autocomplete="name"></div>
+        <div class="col-md-3"><label class="form-label required">Documento</label><input class="form-control fam-doc" required inputmode="numeric" pattern="\\d{6,12}" maxlength="12" autocomplete="off"></div>
+        <div class="col-md-2"><label class="form-label required">¿Vive?</label>
+          <select class="form-select fam-vive" required><option value="">Seleccioná…</option><option value="si">Sí</option><option value="no">No</option></select>
+        </div>
+        <div class="col-md-2"><label class="form-label required">¿Convive?</label>
+          <select class="form-select fam-convive" required><option value="">Seleccioná…</option><option value="si">Sí</option><option value="no">No</option></select>
+        </div>
+
+        <div class="col-md-3"><label class="form-label required">Estado civil</label>
+          <select class="form-select fam-ecivil" required>
+            <option value="">Seleccioná…</option>
+            <option>Soltero/a</option><option>Casado/a</option><option>Divorciado/a</option><option>Viudo/a</option><option>Unión convivencial</option>
+          </select>
+        </div>
+        <div class="col-md-3"><label class="form-label required">Nacionalidad</label><input class="form-control fam-nacionalidad" required list="paises" autocomplete="country-name"></div>
+        <div class="col-md-3"><label class="form-label required">Nombre del padre</label><input class="form-control fam-padre" required autocomplete="additional-name" placeholder="Nombre y Apellido"></div>
+        <div class="col-md-3"><label class="form-label required">Nombre de la madre</label><input class="form-control fam-madre" required autocomplete="additional-name" placeholder="Nombre y Apellido"></div>
+
+        <div class="col-md-4"><label class="form-label">Ocupación</label><input class="form-control fam-ocup" placeholder="Ej.: Estudiante, Empleado"></div>
+        <div class="col-md-4">
+          <label class="form-label required">¿Trabajó en PFA?</label>
+          <select class="form-select fam-pfa" required>
+            <option value="">Seleccioná…</option>
+            <option value="si">Sí</option>
+            <option value="no">No</option>
+          </select>
+        </div>
+        <div class="col-md-4"><label class="form-label">¿Posee discapacidad?</label>
+          <select class="form-select fam-disc">
+            <option value="">Prefiero no responder</option>
+            <option value="no">No</option>
+            <option value="si">Sí</option>
+          </select>
+        </div>
+        <div class="col-md-4 d-none fam-disc-det-wrap"><label class="form-label">Detalle (opcional)</label><input class="form-control fam-disc-det" placeholder="Ej.: motriz, visual, etc."></div>
+
+        <div class="col-12 fam-addr d-none">
+          <div class="row g-2 mt-1">
+            <div class="col-md-6"><label class="form-label required">Domicilio</label><input class="form-control fam-dir" autocomplete="address-line1"></div>
+            <div class="col-md-3"><label class="form-label required">Localidad</label><input class="form-control fam-loc" autocomplete="address-level2"></div>
+            <div class="col-md-3"><label class="form-label required">Provincia/Estado</label><input class="form-control fam-prov" autocomplete="address-level1"></div>
+            <div class="col-md-3"><label class="form-label required">País</label><input class="form-control fam-pais" list="paises" autocomplete="country-name"></div>
+          </div>
+        </div>
+
+        <div class="col-auto ms-auto"><button class="btn btn-outline-danger btn-sm" type="button" data-remove>Quitar</button></div>
+      </div>
+    </div>`;
+
+  document.querySelectorAll('[data-add]').forEach(btn=>{
+    btn.addEventListener('click', ()=>{
+      const listId = btn.getAttribute('data-add');
+      const list = document.getElementById(listId);
+      const isHermanos = listId === 'listHermanos';
+      list.insertAdjacentHTML('beforeend', famTemplate(isHermanos));
+      bindFamItem(list.lastElementChild);
+      const none = document.querySelector(`.fam-none[data-target="${listId}"]`); if(none) none.checked=false;
+    });
+  });
+
+  function bindFamItem(wrapper){
+    const selConvive = wrapper.querySelector('.fam-convive');
+    const addrBlock  = wrapper.querySelector('.fam-addr');
+    const btnRemove  = wrapper.querySelector('[data-remove]');
+    selConvive?.addEventListener('change', ()=>{
+      const show = selConvive.value === 'no';
+      addrBlock.classList.toggle('d-none', !show);
+      addrBlock.querySelectorAll('input').forEach(inp=>{ if(show){ inp.setAttribute('required','required'); } else { inp.removeAttribute('required'); inp.value=""; }});
+    });
+    btnRemove?.addEventListener('click', ()=> wrapper.parentElement.removeChild(wrapper));
+
+    const selDisc = wrapper.querySelector('.fam-disc');
+    const detWrap = wrapper.querySelector('.fam-disc-det-wrap');
+    selDisc?.addEventListener('change', ()=>{
+      const show = selDisc.value === 'si';
+      detWrap.classList.toggle('d-none', !show);
+      const det = detWrap.querySelector('input');
+      if(show){ det.removeAttribute('disabled'); }
+      else { det.value=''; det.setAttribute('disabled','disabled'); }
+    });
+  }
+
+  document.querySelectorAll('.fam-none').forEach(chk=>{
+    chk.addEventListener('change', ()=>{
+      const list = document.getElementById(chk.dataset.target); if(chk.checked) list.innerHTML='';
+    });
+  });
+
+  function validateContainer(container){
+    const inputs = Array.from(container.querySelectorAll('input, select'))
+      .filter(el => !el.disabled && el.offsetParent !== null);
+    for (const el of inputs){
+      if(!el.checkValidity()){
+        el.reportValidity?.();
+        flash(el); flashBlock(container);
+        el.scrollIntoView({behavior:'smooth', block:'center'});
+        return false;
+      }
+    }
+    return true;
+  }
+
+  function validateDomicilios(){
+    const blk1 = document.querySelector('.block-dom-dni');
+    if(!validateContainer(blk1)) return false;
+    copyAddress();
+    const blk2 = document.querySelector('.block-dom-act');
+    if(!validateContainer(blk2)) return false;
+    return true;
+  }
+
+  function validatePadreMadre(){
+    const checks = [
+      {chk:'nonePadre', blk:'blkPadre', name:'Padre'},
+      {chk:'noneMadre', blk:'blkMadre', name:'Madre/Tutor'}
+    ];
+    for (const {chk, blk, name} of checks){
+      const off = document.getElementById(chk).checked;
+      const cont = document.getElementById(blk);
+      if(!off){
+        const ok = validateContainer(cont);
+        if(!ok) return {ok:false, msg:`Completá todos los campos de ${name}.`};
+      }
+    }
+    return {ok:true};
+  }
+
+  function validateListOrNone(listId, noneChkId, label){
+    const list = document.getElementById(listId);
+    const none = document.getElementById(noneChkId);
+    const hasItems = list.children.length > 0;
+    const noneOn = !!(none && none.checked);
+
+    if (!hasItems && !noneOn){
+      const warn = document.createElement('div');
+      warn.className = 'text-danger fw-semibold mt-1';
+      warn.textContent = `Debés informar ${label} o marcar "No tengo".`;
+      const last = list.parentElement.querySelector('.text-danger.fw-semibold.mt-1');
+      if(!last) list.parentElement.appendChild(warn);
+      list.scrollIntoView({behavior:'smooth', block:'center'});
+      flashBlock(list.parentElement);
+      return false;
+    } else {
+      const last = list.parentElement.querySelector('.text-danger.fw-semibold.mt-1');
+      if(last) last.remove();
+    }
+
+    if (noneOn) return true;
+
+    const items = Array.from(list.querySelectorAll('.fam-item'));
+    for(const item of items){
+      const fields = Array.from(item.querySelectorAll('input, select'))
+        .filter(el => !el.disabled && el.offsetParent !== null);
+      for(const el of fields){
+        if(!el.checkValidity()){
+          el.reportValidity?.();
+          flash(el); flashBlock(item);
+          item.scrollIntoView({behavior:'smooth', block:'center'});
+          return false;
+        }
+      }
+    }
+    return true;
+  }
+
+  document.getElementById('btnVolver').addEventListener('click', ()=>{ goToStep(1); });
+
+  const msg2 = document.getElementById('msg2');
+
+  // Construye el JSON que se envía al backend (solo datos del Paso 1)
+  function construirPayloadAspirante() {
+    const cargoOpt = cargo.options[cargo.selectedIndex];
+    return {
+      dni: dni.value.trim(),
+      ejemplar: ejemplar.value,
+      numeroTramite: tramite.value.trim(),
+      fechaNacimiento: nac.value,              // formato yyyy-MM-dd
+      cargo: cargoOpt ? cargoOpt.text : "",   // texto visible de la opción
+      email: email.value.trim(),
+      telefono: telPrincipal.value.trim(),
+      telefonoAlternativo: telAlternativo.value.trim(),
+      prestasteServicio: otraFuerza.value     // "si" / "no"
+    };
+  }
+
+  async function enviarPreinscripcionBackend() {
+    const payload = construirPayloadAspirante();
+    msg2.classList.remove('text-danger','text-success');
+    msg2.classList.add('text-primary');
+    msg2.textContent = 'Enviando pre-inscripción…';
+
+    try {
+      const resp = await fetch('http://localhost:8080/api/aspirantes', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(payload)
+      });
+
+      if (!resp.ok) {
+        const txt = await resp.text().catch(()=> '');
+        throw new Error(txt || 'Error al registrar la pre-inscripción.');
+      }
+
+      let data = null;
+      try { data = await resp.json(); } catch(e) { /* respuesta sin cuerpo JSON */ }
+
+      msg2.classList.remove('text-primary','text-danger');
+      msg2.classList.add('text-success');
+      msg2.textContent = 'Pre-inscripción registrada correctamente.';
+
+      const card = document.querySelector('.card-glass');
+      if (card) {
+        card.innerHTML = `
+          <div class="p-5 text-center">
+            <div class="display-6 mb-3 text-success">
+              <i class="bi bi-check2-circle me-2"></i>¡Pre-inscripción registrada!
+            </div>
+            <p class="lead mb-3">
+              Tus datos fueron enviados correctamente. Revisá tu casilla de e-mail para los próximos pasos.
+            </p>
+            ${data && data.id ? `<p class="mb-0">N.º de registro: <strong>${data.id}</strong></p>` : ''}
+          </div>`;
+      }
+      window.scrollTo({top:0, behavior:'smooth'});
+    } catch (err) {
+      console.error(err);
+      msg2.classList.remove('text-primary','text-success');
+      msg2.classList.add('text-danger');
+      msg2.textContent = 'Ocurrió un error al enviar la pre-inscripción. Intentá nuevamente en unos minutos.';
+      flashBlock(document.querySelector('.card-glass'));
+    }
+  }
+
+  document.getElementById('btnEnviarFinal').addEventListener('click', async ()=>{
+    msg2.textContent=''; msg2.className='mt-3 fw-semibold';
+
+    // Validaciones de Paso 2 (se mantiene todo igual)
+    if(!validateDomicilios()){
+      msg2.classList.add('text-danger'); msg2.textContent='Completá todos los datos de domicilios.'; return;
+    }
+
+    const um = validatePadreMadre();
+    if(!um.ok){ msg2.classList.add('text-danger'); msg2.textContent = um.msg; return; }
+
+    const okPareja   = validateListOrNone('listPareja',   'nonePareja',   'Cónyuge/pareja/ex');
+    if(!okPareja){ msg2.classList.add('text-danger'); msg2.textContent='Revisá la sección “Cónyuge / Pareja / Ex”.'; return; }
+    const okHijos    = validateListOrNone('listHijos',    'noneHijos',    'Hijos');
+    if(!okHijos){ msg2.classList.add('text-danger'); msg2.textContent='Revisá la sección “Hijos”.'; return; }
+    const okHerm     = validateListOrNone('listHermanos', 'noneHermanos', 'Hermanos/Hermanastros');
+    if(!okHerm){ msg2.classList.add('text-danger'); msg2.textContent='Revisá la sección “Hermanos”.'; return; }
+    const okOtros    = validateListOrNone('listOtros',    'noneOtros',    'Otros familiares/convivientes');
+    if(!okOtros){ msg2.classList.add('text-danger'); msg2.textContent='Revisá la sección “Otros”.'; return; }
+
+    const acepta = document.getElementById('acepto2');
+    if(!acepta.checked){ acepta.reportValidity?.(); msg2.classList.add('text-danger'); msg2.textContent='Debés aceptar la declaración final.'; return; }
+
+    // Si todo está OK, ahora sí enviamos al backend
+    await enviarPreinscripcionBackend();
+  });
+
+  // ----- Formulario de consulta: una sola activa por aspirante (por mail) -----
+  const formConsulta = document.getElementById('formConsulta');
+  const alertaConsulta = document.getElementById('consultaExito');
+  const avisoBloqueoConsulta = document.getElementById('consultaBloqueada');
+  const modalConsultaEl = document.getElementById('modalConsulta');
+
+  // Al abrir el modal de consulta: limpiar formulario y ocultar aviso de bloqueo
+  if (modalConsultaEl) {
+    modalConsultaEl.addEventListener('show.bs.modal', () => {
+      if (!formConsulta) return;
+      formConsulta.reset();
+      formConsulta.classList.remove('was-validated');
+      if (avisoBloqueoConsulta) avisoBloqueoConsulta.classList.add('d-none');
+    });
+  }
+
+  // Helpers para simular "consulta activa" en el front (localStorage).
+  // En producción, esta regla debe estar también en backend/Base de datos.
+  function tieneConsultaActiva(email) {
+    if (!email) return false;
+    const key = 'consultaActiva_' + email.trim().toLowerCase();
+    return localStorage.getItem(key) === '1';
+  }
+
+  function marcarConsultaActiva(email) {
+    if (!email) return;
+    const key = 'consultaActiva_' + email.trim().toLowerCase();
+    localStorage.setItem(key, '1');
+  }
+
+  if (formConsulta) {
+    formConsulta.addEventListener('submit', (e) => {
+      e.preventDefault();
+
+      // Validación HTML5
+      if (!formConsulta.checkValidity()) {
+        formConsulta.classList.add('was-validated');
+        const first = formConsulta.querySelector(':invalid');
+        if (first) { flash(first); first.focus(); }
+        return;
+      }
+
+      const emailInput = document.getElementById('consultaMail');
+      const emailValue = emailInput?.value || '';
+
+      // Regla: una sola consulta activa por mail
+      if (tieneConsultaActiva(emailValue)) {
+        if (avisoBloqueoConsulta) {
+          avisoBloqueoConsulta.classList.remove('d-none');
+          avisoBloqueoConsulta.scrollIntoView({behavior:'smooth', block:'nearest'});
+        }
+        flashBlock(formConsulta);
+        return;
+      }
+
+      // Marca consulta como activa para ese mail
+      marcarConsultaActiva(emailValue);
+
+      // Éxito: reset, cerrar modal, mostrar mensaje
+      formConsulta.classList.remove('was-validated');
+      formConsulta.reset();
+
+      const modalInstancia = bootstrap.Modal.getInstance(modalConsultaEl);
+      if (modalInstancia) modalInstancia.hide();
+
+      if (alertaConsulta) {
+        alertaConsulta.classList.remove('d-none');
+        alertaConsulta.focus();
+      }
+
+      // Acá iría el envío real al backend (fetch/AJAX) si se conecta con servidor.
+    });
+  }
+</script>
+</body>
+</html>
